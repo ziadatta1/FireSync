@@ -33,14 +33,20 @@ function gainVerdict(fit?: number, base?: number) {
 
 function SideBar({ side, label, other, color }: { side: Side; label: string; other: string; color: string }) {
   const total = side.cell_overpasses || 1
+  const footprint = side.coverage_method === 'swath_footprint'
   const seg = [
     { key: 'co', value: side.co_detected, cls: 'seg-co', text: `co-detected by ${other}` },
-    { key: 'viewed', value: side.other_viewed_area_no_detection, cls: 'seg-viewed', text: `${other} viewed area, no detection in cell (proxy)` },
-    { key: 'unknown', value: side.other_coverage_unknown, cls: 'seg-unknown', text: `${other} coverage unknown` },
-  ]
+    { key: 'viewed', value: side.other_viewed_area_no_detection, cls: 'seg-viewed', text: footprint ? `in ${other}'s swath, no detection` : `${other} detected nearby, none in cell (proxy)` },
+    { key: 'notview', value: side.other_not_in_view, cls: 'seg-notview', text: `not in ${other}'s swath` },
+    { key: 'unknown', value: side.other_coverage_unknown, cls: 'seg-unknown', text: footprint ? `${other} catalogue gap (unknown)` : `${other} coverage unknown` },
+    { key: 'elsewhere', value: side.other_look_paired_elsewhere, cls: 'seg-elsewhere', text: `${other} look already paired with another ${label} look` },
+  ].filter((s) => s.key !== 'notview' || footprint)
   return (
     <div className="side-bar">
-      <div className="side-bar-head"><span><i className="swatch" style={{ background: color }} />{label}: {fmt(side.cell_overpasses)} cell-overpasses</span><b>{side.conditional_co_detection_rate === null ? '—' : `${fmt(side.conditional_co_detection_rate * 100, 1)}%`} <small>co-detection where {other} viewed</small></b></div>
+      <div className="side-bar-head">
+        <span><i className="swatch" style={{ background: color }} />{label}: {fmt(side.cell_overpasses)} cell-overpasses <span className={`method-tag ${footprint ? 'fp' : 'proxy'}`}>{footprint ? `${other} swath footprints` : 'coverage proxy'}</span></span>
+        <b>{side.conditional_co_detection_rate === null ? '—' : `${fmt(side.conditional_co_detection_rate * 100, 1)}%`} <small>co-detection where the fire was {footprint ? `in ${other}'s swath` : `near ${other} detections`}</small></b>
+      </div>
       <div className="stack" role="img" aria-label={`${label} cell-overpass outcomes`}>
         {seg.map((s) => s.value > 0 && <span key={s.key} className={s.cls} style={{ width: `${(s.value / total) * 100}%` }} title={`${s.text}: ${fmt(s.value)}`} />)}
       </div>
@@ -117,7 +123,7 @@ export default function ComparePanel({ filters, area }: { filters: Filters; area
             <h3>Detection agreement <small>separating “not detected” from “not observed”</small></h3>
             <SideBar side={r.a_side} label={nameA} other={nameB} color={SOURCES[r.source_a].color} />
             <SideBar side={r.b_side} label={nameB} other={nameA} color={SOURCES[r.source_b].color} />
-            <p className="chart-note">“Viewed area” is a coverage proxy: the other sensor produced a detection somewhere in the same 1° cell within the window, so that part of the scene was imaged. FIRMS files contain detections only — no swath or cloud masks — so a proxy “non-detection” may still be cloud-obscured. “Coverage unknown” is never counted as disagreement.</p>
+            <p className="chart-note">Rate = co-detected ÷ (co-detected + in the other satellite's swath with no detection). <b>Swath footprints</b> are NASA CMR granule outlines (the FIRMS "Satellite Swath Outlines"); every catalogued detection of each satellite falls inside its own footprints. They show what was in view, not whether it was cloud-free, so some "no detection" cases are clouds. Catalogue gaps are "unknown", and neither "unknown" nor "already paired" counts toward the rate. Where a satellite has no footprints, a weaker proxy is used: the other satellite detected something in the same 1° cell within the window.</p>
           </div>
 
           <div className="chart-grid two">

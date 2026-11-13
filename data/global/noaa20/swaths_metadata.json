@@ -1,0 +1,40 @@
+{
+  "dataset": "noaa20",
+  "provider": "NASA Common Metadata Repository (CMR)",
+  "endpoint": "https://cmr.earthdata.nasa.gov/search/granules.json",
+  "query_temporal": [
+    "2026-11-06T00:00:00Z",
+    "2026-11-13T23:59:59Z"
+  ],
+  "retrieved_at": "2026-11-13T20:12:19Z",
+  "collections": [
+    {
+      "satellite": "N20",
+      "short_name": "VJ114IMG_NRT",
+      "version": "2",
+      "concept_id": "C1907902788-LANCEMODIS",
+      "granules": 1731,
+      "first_start": "2026-11-06T01:54:00.000Z",
+      "last_end": "2026-11-13T18:12:00.000Z"
+    }
+  ],
+  "granule_count": 1731,
+  "sha256": "a505d53b4a33ff90bfb9568322001aae038ee6c42c2dc7ad9c16ef4bc04204da",
+  "geometry": "GEODETIC polygon per granule (great-circle edges), from CMR granule metadata",
+  "validation_own_detections_inside_own_footprint": {
+    "N20": {
+      "catalogue_intervals": 10,
+      "catalogued_minutes": 10386.0,
+      "detections": 416571,
+      "detections_in_catalogued_time": 385903,
+      "detections_in_catalogue_gaps_or_before_first_granule": 30668,
+      "inside_own_footprint": 385903,
+      "inside_fraction": 1.0
+    }
+  },
+  "caveats": [
+    "Outlines are derived from granule bounding coordinates and are imprecise at swath edges (NASA FIRMS).",
+    "A footprint shows the area within view of the sensor, not cloud-free or valid land pixels.",
+    "NRT granules age out of CMR, so footprints may not cover the first part of the dataset period."
+  ]
+}

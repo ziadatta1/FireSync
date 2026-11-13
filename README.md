@@ -22,7 +22,7 @@ science, [DATA_PROVENANCE.md](DATA_PROVENANCE.md) for where every file came from
 | View | What it does |
 |---|---|
 | **Global map & area analysis** | Canvas-rendered map. Detections are aggregated server-side into 2° → 0.1° cells as you zoom, and become individual detections at zoom ≥ 7. Each source has its own color and shape (MODIS ■, NOAA-20 ●, NOAA-21 ◆). Click a cell for per-source counts, or a detection for its full source record. Filter by source, UTC date, confidence class and day/night. Draw a **box** or **polygon**, or type coordinates, to get per-satellite totals, daily and hourly activity, FRP distribution and statistics, confidence classes, top active cells (click to fly there), and a **CSV export** of the exact source rows. |
-| **Sensor comparison** | Paired cell-overpass matching on a common grid with a time window. It reports co-detection rates and separates "not detected" from "not observed" with a coverage proxy. It also shows the distribution of overpass time offsets, a paired FRP scatter, an overpass-order test, and a calibration that is validated on held-out dates against 1:1. Calibration is refused when the sensors don't observe simultaneously. Presets cover NOAA-20 ↔ NOAA-21 and Aqua MODIS ↔ VIIRS. Runs globally or inside the drawn area. |
+| **Sensor comparison** | Paired cell-overpass matching on a common grid with a time window. It reports co-detection rates and separates "not detected" from "not in view" using NASA **swath footprints**: one granule outline per 5–6 minutes per satellite, from the public CMR catalogue. Catalogue gaps are reported as unknown. It also shows the distribution of overpass time offsets, a paired FRP scatter, an overpass-order test, and a calibration that is validated on held-out dates against 1:1. Calibration is refused when the sensors don't observe simultaneously. Presets cover NOAA-20 ↔ NOAA-21 and Aqua MODIS ↔ VIIRS. Runs globally or inside the drawn area. |
 | **Data & provenance** | Per-dataset row counts, a daily strip, SHA-256, quality checks, and an exact-row cross-check against direct FIRMS API retrievals. The original FireSync local-file / API-import map is kept here unchanged. |
 | **Methodology** | Summary of the method and its limits. |
 
@@ -46,6 +46,13 @@ new machine. Download the three FIRMS global 7-day CSVs, then register them:
 
 ```sh
 backend/.venv/bin/python backend/scripts/register_global.py --modis ~/Downloads/MODIS_C6_1_Global_7d.csv --noaa20 ~/Downloads/J1_VIIRS_C2_Global_7d.csv --noaa21 ~/Downloads/J2_VIIRS_C2_Global_7d.csv
+```
+
+Swath footprints are already committed under `data/global/*/swaths.json`. To fetch them for
+newly registered data (public NASA CMR, no key needed):
+
+```sh
+backend/.venv/bin/python backend/scripts/fetch_swaths.py
 ```
 
 The large CSVs under `data/global/*/observations.csv` are git-ignored. Their `metadata.json`
@@ -109,7 +116,7 @@ backend/.venv/bin/python -m pytest -q backend
 cd frontend && npm run build
 ```
 
-Current result: **48 passed, 1 skipped**. The skip is a pre-existing test, and the suite also
+Current result: **53 passed, 1 skipped**. The skip is a pre-existing test, and the suite also
 passes with `-W error::RuntimeWarning`. The production build passes. Tests include synthetic
 datasets with known answers for:
 
@@ -135,12 +142,13 @@ backend/app/main.py            FastAPI app (foundation + /api/global/*)
 backend/app/global_data.py     columnar dataset store, filters, grid, stats, export
 backend/app/compare.py         paired cell-overpass comparison and calibration
 backend/app/firms.py           FIRMS API client and immutable import storage
-backend/scripts/               register_global.py, run_comparison.py
+backend/scripts/               register_global.py, fetch_swaths.py, run_comparison.py
+backend/app/swaths.py          swath footprints: spherical containment, catalogue-gap handling
 frontend/src/GlobalMap.tsx     canvas map, area drawing, record inspector
 frontend/src/DetectionLayer.ts custom Leaflet canvas layer (no DOM markers)
 frontend/src/AnalyticsPanel.tsx, ComparePanel.tsx, DataPanel.tsx, charts.tsx
 frontend/src/WildfireMap.tsx   original foundation map (unchanged)
-data/global/                   registered datasets + provenance sidecars
+data/global/                   registered datasets, swath footprints + provenance sidecars
 data/imports/                  FIRMS API imports + sidecars
 docs/                          methodology, demo guide, comparison results, screenshots
 ```

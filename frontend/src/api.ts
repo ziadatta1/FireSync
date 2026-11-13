@@ -83,8 +83,11 @@ export type Side = {
   cell_overpasses: number
   co_detected: number
   other_viewed_area_no_detection: number
+  other_not_in_view: number
   other_coverage_unknown: number
+  other_look_paired_elsewhere: number
   conditional_co_detection_rate: number | null
+  coverage_method: 'swath_footprint' | 'coarse_cell_proxy'
 }
 
 export type ErrorBlock = { bias_log10: number; median_abs_error_log10: number; rmse_log10: number; median_abs_error_factor: number }

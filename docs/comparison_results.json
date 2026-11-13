@@ -33,16 +33,22 @@
   "a_side": {
    "cell_overpasses": 167863,
    "co_detected": 76741,
-   "other_viewed_area_no_detection": 78492,
-   "other_coverage_unknown": 12630,
-   "conditional_co_detection_rate": 0.4944
+   "other_viewed_area_no_detection": 78375,
+   "other_not_in_view": 0,
+   "other_coverage_unknown": 8561,
+   "other_look_paired_elsewhere": 4186,
+   "conditional_co_detection_rate": 0.4947,
+   "coverage_method": "swath_footprint"
   },
   "b_side": {
    "cell_overpasses": 171319,
    "co_detected": 76741,
-   "other_viewed_area_no_detection": 76058,
-   "other_coverage_unknown": 18520,
-   "conditional_co_detection_rate": 0.5022
+   "other_viewed_area_no_detection": 79938,
+   "other_not_in_view": 0,
+   "other_coverage_unknown": 10438,
+   "other_look_paired_elsewhere": 4202,
+   "conditional_co_detection_rate": 0.4898,
+   "coverage_method": "swath_footprint"
   },
   "timing": {
    "pairs": 76741,
@@ -192,6 +198,11 @@
   "method": {
    "event_gap_minutes": 20,
    "coverage_proxy_cell_degrees": 1.0,
+   "footprint_time_slack_min": 3.0,
+   "footprints_available": {
+    "noaa20": true,
+    "noaa21": true
+   },
    "calibration_max_median_dt_min": 60,
    "train_fraction_of_dates": 0.6,
    "bootstrap_resamples": 400
@@ -231,16 +242,22 @@
   "a_side": {
    "cell_overpasses": 133256,
    "co_detected": 68494,
-   "other_viewed_area_no_detection": 52866,
-   "other_coverage_unknown": 11896,
-   "conditional_co_detection_rate": 0.5644
+   "other_viewed_area_no_detection": 54824,
+   "other_not_in_view": 0,
+   "other_coverage_unknown": 5728,
+   "other_look_paired_elsewhere": 4210,
+   "conditional_co_detection_rate": 0.5554,
+   "coverage_method": "swath_footprint"
   },
   "b_side": {
    "cell_overpasses": 136157,
    "co_detected": 68494,
-   "other_viewed_area_no_detection": 51250,
-   "other_coverage_unknown": 16413,
-   "conditional_co_detection_rate": 0.572
+   "other_viewed_area_no_detection": 56275,
+   "other_not_in_view": 0,
+   "other_coverage_unknown": 7386,
+   "other_look_paired_elsewhere": 4002,
+   "conditional_co_detection_rate": 0.549,
+   "coverage_method": "swath_footprint"
   },
   "timing": {
    "pairs": 68494,
@@ -390,6 +407,11 @@
   "method": {
    "event_gap_minutes": 20,
    "coverage_proxy_cell_degrees": 1.0,
+   "footprint_time_slack_min": 3.0,
+   "footprints_available": {
+    "noaa20": true,
+    "noaa21": true
+   },
    "calibration_max_median_dt_min": 60,
    "train_fraction_of_dates": 0.6,
    "bootstrap_resamples": 400
@@ -429,16 +451,22 @@
   "a_side": {
    "cell_overpasses": 85473,
    "co_detected": 50711,
-   "other_viewed_area_no_detection": 24098,
-   "other_coverage_unknown": 10664,
-   "conditional_co_detection_rate": 0.6779
+   "other_viewed_area_no_detection": 28146,
+   "other_not_in_view": 0,
+   "other_coverage_unknown": 2637,
+   "other_look_paired_elsewhere": 3979,
+   "conditional_co_detection_rate": 0.6431,
+   "coverage_method": "swath_footprint"
   },
   "b_side": {
    "cell_overpasses": 87368,
    "co_detected": 50711,
-   "other_viewed_area_no_detection": 23273,
-   "other_coverage_unknown": 13384,
-   "conditional_co_detection_rate": 0.6854
+   "other_viewed_area_no_detection": 29134,
+   "other_not_in_view": 0,
+   "other_coverage_unknown": 3863,
+   "other_look_paired_elsewhere": 3660,
+   "conditional_co_detection_rate": 0.6351,
+   "coverage_method": "swath_footprint"
   },
   "timing": {
    "pairs": 50711,
@@ -588,6 +616,11 @@
   "method": {
    "event_gap_minutes": 20,
    "coverage_proxy_cell_degrees": 1.0,
+   "footprint_time_slack_min": 3.0,
+   "footprints_available": {
+    "noaa20": true,
+    "noaa21": true
+   },
    "calibration_max_median_dt_min": 60,
    "train_fraction_of_dates": 0.6,
    "bootstrap_resamples": 400
@@ -627,16 +660,22 @@
   "a_side": {
    "cell_overpasses": 26267,
    "co_detected": 13925,
-   "other_viewed_area_no_detection": 8604,
-   "other_coverage_unknown": 3738,
-   "conditional_co_detection_rate": 0.6181
+   "other_viewed_area_no_detection": 9741,
+   "other_not_in_view": 329,
+   "other_coverage_unknown": 2271,
+   "other_look_paired_elsewhere": 1,
+   "conditional_co_detection_rate": 0.5884,
+   "coverage_method": "swath_footprint"
   },
   "b_side": {
    "cell_overpasses": 133256,
    "co_detected": 13925,
-   "other_viewed_area_no_detection": 38685,
-   "other_coverage_unknown": 80646,
-   "conditional_co_detection_rate": 0.2647
+   "other_viewed_area_no_detection": 86733,
+   "other_not_in_view": 22281,
+   "other_coverage_unknown": 9913,
+   "other_look_paired_elsewhere": 404,
+   "conditional_co_detection_rate": 0.1383,
+   "coverage_method": "swath_footprint"
   },
   "timing": {
    "pairs": 13925,
@@ -735,6 +774,11 @@
   "method": {
    "event_gap_minutes": 20,
    "coverage_proxy_cell_degrees": 1.0,
+   "footprint_time_slack_min": 3.0,
+   "footprints_available": {
+    "modis": true,
+    "noaa20": true
+   },
    "calibration_max_median_dt_min": 60,
    "train_fraction_of_dates": 0.6,
    "bootstrap_resamples": 400
@@ -774,16 +818,22 @@
   "a_side": {
    "cell_overpasses": 26267,
    "co_detected": 13718,
-   "other_viewed_area_no_detection": 9146,
-   "other_coverage_unknown": 3403,
-   "conditional_co_detection_rate": 0.6
+   "other_viewed_area_no_detection": 10508,
+   "other_not_in_view": 975,
+   "other_coverage_unknown": 1065,
+   "other_look_paired_elsewhere": 1,
+   "conditional_co_detection_rate": 0.5663,
+   "coverage_method": "swath_footprint"
   },
   "b_side": {
    "cell_overpasses": 136157,
    "co_detected": 13718,
-   "other_viewed_area_no_detection": 38347,
-   "other_coverage_unknown": 84092,
-   "conditional_co_detection_rate": 0.2635
+   "other_viewed_area_no_detection": 83867,
+   "other_not_in_view": 27455,
+   "other_coverage_unknown": 10820,
+   "other_look_paired_elsewhere": 297,
+   "conditional_co_detection_rate": 0.1406,
+   "coverage_method": "swath_footprint"
   },
   "timing": {
    "pairs": 13718,
@@ -882,6 +932,11 @@
   "method": {
    "event_gap_minutes": 20,
    "coverage_proxy_cell_degrees": 1.0,
+   "footprint_time_slack_min": 3.0,
+   "footprints_available": {
+    "modis": true,
+    "noaa21": true
+   },
    "calibration_max_median_dt_min": 60,
    "train_fraction_of_dates": 0.6,
    "bootstrap_resamples": 400
@@ -921,16 +976,22 @@
   "a_side": {
    "cell_overpasses": 41223,
    "co_detected": 282,
-   "other_viewed_area_no_detection": 200,
-   "other_coverage_unknown": 40741,
-   "conditional_co_detection_rate": 0.5851
+   "other_viewed_area_no_detection": 529,
+   "other_not_in_view": 35733,
+   "other_coverage_unknown": 4679,
+   "other_look_paired_elsewhere": 0,
+   "conditional_co_detection_rate": 0.3477,
+   "coverage_method": "swath_footprint"
   },
   "b_side": {
    "cell_overpasses": 133256,
    "co_detected": 282,
-   "other_viewed_area_no_detection": 827,
-   "other_coverage_unknown": 132147,
-   "conditional_co_detection_rate": 0.2543
+   "other_viewed_area_no_detection": 4333,
+   "other_not_in_view": 116906,
+   "other_coverage_unknown": 11735,
+   "other_look_paired_elsewhere": 0,
+   "conditional_co_detection_rate": 0.0611,
+   "coverage_method": "swath_footprint"
   },
   "timing": {
    "pairs": 282,
@@ -1070,6 +1131,11 @@
   "method": {
    "event_gap_minutes": 20,
    "coverage_proxy_cell_degrees": 1.0,
+   "footprint_time_slack_min": 3.0,
+   "footprints_available": {
+    "modis": true,
+    "noaa20": true
+   },
    "calibration_max_median_dt_min": 60,
    "train_fraction_of_dates": 0.6,
    "bootstrap_resamples": 400
@@ -1109,16 +1175,22 @@
   "a_side": {
    "cell_overpasses": 41223,
    "co_detected": 125,
-   "other_viewed_area_no_detection": 90,
-   "other_coverage_unknown": 41008,
-   "conditional_co_detection_rate": 0.5814
+   "other_viewed_area_no_detection": 305,
+   "other_not_in_view": 36626,
+   "other_coverage_unknown": 4167,
+   "other_look_paired_elsewhere": 0,
+   "conditional_co_detection_rate": 0.2907,
+   "coverage_method": "swath_footprint"
   },
   "b_side": {
    "cell_overpasses": 136157,
    "co_detected": 125,
-   "other_viewed_area_no_detection": 301,
-   "other_coverage_unknown": 135731,
-   "conditional_co_detection_rate": 0.2934
+   "other_viewed_area_no_detection": 1861,
+   "other_not_in_view": 120853,
+   "other_coverage_unknown": 13318,
+   "other_look_paired_elsewhere": 0,
+   "conditional_co_detection_rate": 0.0629,
+   "coverage_method": "swath_footprint"
   },
   "timing": {
    "pairs": 125,
@@ -1219,6 +1291,11 @@
   "method": {
    "event_gap_minutes": 20,
    "coverage_proxy_cell_degrees": 1.0,
+   "footprint_time_slack_min": 3.0,
+   "footprints_available": {
+    "modis": true,
+    "noaa21": true
+   },
    "calibration_max_median_dt_min": 60,
    "train_fraction_of_dates": 0.6,
    "bootstrap_resamples": 400

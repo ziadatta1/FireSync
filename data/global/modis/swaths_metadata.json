@@ -1,0 +1,58 @@
+{
+  "dataset": "modis",
+  "provider": "NASA Common Metadata Repository (CMR)",
+  "endpoint": "https://cmr.earthdata.nasa.gov/search/granules.json",
+  "query_temporal": [
+    "2026-11-06T00:00:00Z",
+    "2026-11-13T23:59:59Z"
+  ],
+  "retrieved_at": "2026-11-13T20:12:17Z",
+  "collections": [
+    {
+      "satellite": "T",
+      "short_name": "MOD14",
+      "version": "6.1NRT",
+      "concept_id": "C2007630683-LANCEMODIS",
+      "granules": 2068,
+      "first_start": "2026-11-06T14:05:00.000Z",
+      "last_end": "2026-11-13T19:15:00.000Z"
+    },
+    {
+      "satellite": "A",
+      "short_name": "MYD14",
+      "version": "6.1NRT",
+      "concept_id": "C2007630791-LANCEMODIS",
+      "granules": 2068,
+      "first_start": "2026-11-06T14:15:00.000Z",
+      "last_end": "2026-11-13T18:35:00.000Z"
+    }
+  ],
+  "granule_count": 4136,
+  "sha256": "d6fea133dfc6c6cf8744a0bd745b85c21dcacd9a716fd0bf4d0f9aba7f3dab65",
+  "geometry": "GEODETIC polygon per granule (great-circle edges), from CMR granule metadata",
+  "validation_own_detections_inside_own_footprint": {
+    "A": {
+      "catalogue_intervals": 1,
+      "catalogued_minutes": 10340.0,
+      "detections": 51721,
+      "detections_in_catalogued_time": 46978,
+      "detections_in_catalogue_gaps_or_before_first_granule": 4743,
+      "inside_own_footprint": 46978,
+      "inside_fraction": 1.0
+    },
+    "T": {
+      "catalogue_intervals": 2,
+      "catalogued_minutes": 10340.0,
+      "detections": 29537,
+      "detections_in_catalogued_time": 26723,
+      "detections_in_catalogue_gaps_or_before_first_granule": 2814,
+      "inside_own_footprint": 26723,
+      "inside_fraction": 1.0
+    }
+  },
+  "caveats": [
+    "Outlines are derived from granule bounding coordinates and are imprecise at swath edges (NASA FIRMS).",
+    "A footprint shows the area within view of the sensor, not cloud-free or valid land pixels.",
+    "NRT granules age out of CMR, so footprints may not cover the first part of the dataset period."
+  ]
+}

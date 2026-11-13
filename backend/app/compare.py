@@ -8,10 +8,14 @@ Method (documented in docs/METHODOLOGY.md):
    FRP is additive, so the cell-overpass FRP is the sum of its pixels' FRP.
 2. Cell-overpasses of sensor A are matched one-to-one to the nearest-in-time
    cell-overpass of sensor B in the same cell, if |dt| <= window.
-3. Unmatched cell-overpasses are split using a coverage proxy: B is considered
-   to have viewed the area if it produced any detection within the same coarse
-   cell (COARSE_DEG) within the time window.  FIRMS files contain detections
-   only, not swath/cloud masks, so this is a proxy, never proof of observation.
+3. Unmatched cell-overpasses are classified by whether B had the fire location in
+   view within the time window.  When B's swath footprints are available (NASA CMR
+   granule polygons, app/swaths.py) this is tested directly: "viewed, no detection",
+   "not in view", or "unknown" (catalogue gap).  Without footprints a weaker proxy is
+   used: any B detection in the same coarse cell (COARSE_DEG) within the window.
+   A footprint shows what was in view, not whether it was cloud-free.
+   A-looks whose nearest B look was taken by another A-look of the same cell are
+   counted separately and excluded from agreement rates.
 4. FRP agreement is measured on matched pairs in log10 space.  A reduced-major-
    axis (RMA) fit, which treats both sensors as error-bearing, is estimated on
    the earlier dates and evaluated on held-out later dates against an identity
@@ -27,6 +31,7 @@ import numpy as np
 import pandas as pd
 
 from app import global_data as g
+from app import swaths
 
 EVENT_GAP_MIN = 20
 COARSE_DEG = 1.0
@@ -40,7 +45,7 @@ RNG_SEED = 20261113
 def _events(ds: g.Dataset, keep: np.ndarray, cell: float) -> pd.DataFrame:
     idx = np.flatnonzero(keep)
     if idx.size == 0:
-        return pd.DataFrame(columns=["cell", "coarse", "t", "frp", "n", "day"])
+        return pd.DataFrame(columns=["cell", "coarse", "t", "frp", "n", "plat", "plon", "day"])
     row, col = g.cell_ids(ds.lat[idx], ds.lon[idx], cell)
     crow, ccol = g.cell_ids(ds.lat[idx], ds.lon[idx], COARSE_DEG)
     frame = pd.DataFrame(
@@ -49,12 +54,15 @@ def _events(ds: g.Dataset, keep: np.ndarray, cell: float) -> pd.DataFrame:
             "coarse": crow * 1000 + ccol,
             "t": ds.tmin[idx],
             "frp": np.nan_to_num(ds.frp[idx]),
+            "plat": ds.lat[idx],
+            "plon": ds.lon[idx],
         }
     ).sort_values(["cell", "t"], kind="stable")
     new_event = (frame["cell"].diff() != 0) | (frame["t"].diff() > EVENT_GAP_MIN)
     frame["event"] = new_event.cumsum()
     events = frame.groupby("event", sort=False).agg(
-        cell=("cell", "first"), coarse=("coarse", "first"), t=("t", "min"), frp=("frp", "sum"), n=("frp", "size")
+        cell=("cell", "first"), coarse=("coarse", "first"), t=("t", "min"), frp=("frp", "sum"), n=("frp", "size"),
+        plat=("plat", "mean"), plon=("plon", "mean"),
     )
     events["day"] = events["t"] // 1440
     return events.reset_index(drop=True)
@@ -68,6 +76,7 @@ def _match(a: pd.DataFrame, b: pd.DataFrame, window: int) -> pd.DataFrame:
     b["b_id"] = np.arange(len(b))
     if a.empty or b.empty:
         a["b_id"] = np.nan
+        a["raw_hit"] = False
         return a
     left = a.sort_values("t")[["a_id", "cell", "t"]].astype("int64")
     right = b.sort_values("t")[["b_id", "cell", "t"]].astype("int64").rename(columns={"t": "tb"})
@@ -77,6 +86,9 @@ def _match(a: pd.DataFrame, b: pd.DataFrame, window: int) -> pd.DataFrame:
     hits = merged.dropna(subset=["b_id"]).sort_values(["adt", "a_id"], kind="stable")
     hits = hits.drop_duplicates("b_id", keep="first")
     a["b_id"] = a["a_id"].map(hits.set_index("a_id")["b_id"])
+    # True when a B look was within the window in this cell before one-to-one resolution;
+    # if it is now unmatched, its B look was paired with another A look instead.
+    a["raw_hit"] = a["a_id"].isin(merged.loc[merged["b_id"].notna(), "a_id"]).to_numpy()
     return a
 
 
@@ -151,20 +163,38 @@ def compare(
     matched_a = _match(ev_a, ev_b, window)
     matched_b = _match(ev_b, ev_a, window)  # for B-side coverage accounting only
     a_hit = matched_a["b_id"].notna().to_numpy()
-    b_hit = matched_b["b_id"].notna().to_numpy()
-    a_proxy = _coverage_proxy(ev_a[~a_hit], ev_b, window)
-    b_proxy = _coverage_proxy(ev_b[~b_hit], ev_a, window)
 
-    def side(n_events: int, hits: int, proxy: np.ndarray) -> Dict[str, Any]:
-        observed_nondetect = int(proxy.sum())
-        unknown = int((~proxy).sum())
-        denom = hits + observed_nondetect
+    def side(events: pd.DataFrame, matched: pd.DataFrame, other_events: pd.DataFrame, other_source: str, other_sat: Optional[str]) -> Dict[str, Any]:
+        hit = matched["b_id"].notna().to_numpy()
+        paired_elsewhere = ~hit & matched["raw_hit"].to_numpy()
+        rest = ~hit & ~paired_elsewhere
+        unmatched = events[rest]
+        footprints = swaths.load(other_source)
+        not_viewed = 0
+        if footprints is not None:
+            t = unmatched["t"].to_numpy(dtype=float)
+            viewed = footprints.contains(unmatched["plat"].to_numpy(), unmatched["plon"].to_numpy(), t, window, other_sat)
+            known = footprints.known_at(t, other_sat, window)
+            viewed_no_detection = int(viewed.sum())
+            not_viewed = int((~viewed & known).sum())
+            unknown = int((~viewed & ~known).sum())
+            method = "swath_footprint"
+        else:
+            proxy = _coverage_proxy(unmatched, other_events, window)
+            viewed_no_detection = int(proxy.sum())
+            unknown = int((~proxy).sum())
+            method = "coarse_cell_proxy"
+        hits = int(hit.sum())
+        denom = hits + viewed_no_detection
         return {
-            "cell_overpasses": n_events,
+            "cell_overpasses": int(len(events)),
             "co_detected": hits,
-            "other_viewed_area_no_detection": observed_nondetect,
+            "other_viewed_area_no_detection": viewed_no_detection,
+            "other_not_in_view": not_viewed,
             "other_coverage_unknown": unknown,
+            "other_look_paired_elsewhere": int(paired_elsewhere.sum()),
             "conditional_co_detection_rate": round(hits / denom, 4) if denom else None,
+            "coverage_method": method,
         }
 
     pairs = matched_a[a_hit].copy()
@@ -280,8 +310,8 @@ def compare(
         "common_dates": common_dates,
         "compared_dates": [sel_a.date_from, sel_a.date_to],
         "detections": {"a": int(keep_a.sum()), "b": int(keep_b.sum())},
-        "a_side": side(len(ev_a), int(a_hit.sum()), a_proxy),
-        "b_side": side(len(ev_b), int(b_hit.sum()), b_proxy),
+        "a_side": side(ev_a, matched_a, ev_b, source_b, satellite_b),
+        "b_side": side(ev_b, matched_b, ev_a, source_a, satellite_a),
         "timing": {
             "pairs": int(len(pairs)),
             "median_abs_dt_min": round(median_abs_dt, 1) if median_abs_dt is not None else None,
@@ -299,6 +329,8 @@ def compare(
         "method": {
             "event_gap_minutes": EVENT_GAP_MIN,
             "coverage_proxy_cell_degrees": COARSE_DEG,
+            "footprint_time_slack_min": swaths.TIME_SLACK_MIN,
+            "footprints_available": {source_a: swaths.load(source_a) is not None, source_b: swaths.load(source_b) is not None},
             "calibration_max_median_dt_min": CALIBRATION_MAX_MEDIAN_DT_MIN,
             "train_fraction_of_dates": 0.6,
             "bootstrap_resamples": BOOTSTRAP,

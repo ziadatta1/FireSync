@@ -45,12 +45,17 @@ Can their observations be combined? FireSync tests that honestly instead of assu
 
 - Preset **NOAA-20 ↔ NOAA-21**: "We pair each satellite's look at an 11 km cell with the
   other satellite's nearest look at the same cell within ±60 min."
-- Detection agreement bars:
+- Detection agreement bars, built from NASA swath footprints (the outline of what each
+  satellite had in view, every 6 minutes):
   - Green: both detected it.
-  - Grey: the other satellite was imaged nearby but saw nothing in this cell.
-  - Hatched: we can't tell whether it looked.
+  - Grey: the fire was inside the other satellite's swath, but it detected nothing (could be
+    clouds).
+  - Dark: not in the other satellite's swath at all.
+  - Hatched: the NASA catalogue has a gap, so we can't tell.
 
-  "We never count *unknown* as disagreement, and we never call a non-detection 'no fire'."
+  "Every one of 840,000 detections falls inside its own satellite's footprint. That's how we
+  know the footprints are right. We never count *unknown* as disagreement, and we never call
+  a non-detection 'no fire'."
 - Time-offset histogram: the two satellites look about 45 min apart, from both sides.
 - Scatter and **overpass-order test**: "NOAA-21 reads about 17% higher FRP than NOAA-20, and
   it's the same whichever satellite looked first. So it's a sensor difference, not the fire
@@ -77,7 +82,7 @@ Can their observations be combined? FireSync tests that honestly instead of assu
 - **How do you know the downloads are real?** They were independently cross-checked row by
   row against the FIRMS API with our own MAP_KEY. See `DATA_PROVENANCE.md`.
 - **Performance?** About 920k rows sit in numpy arrays. A global grid takes about 90 ms, and
-  a full pairing comparison about 1.6 s (then it's cached).
+  a full pairing comparison with swath footprints about 2 s (then it's cached).
 
 ## If something fails live
 

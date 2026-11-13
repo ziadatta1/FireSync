@@ -48,6 +48,38 @@ and part of 2026-11-12, so `modis.csv` is very likely an earlier FIRMS MODIS NRT
 It is still labelled unverified in the legacy view, because its own download record is
 missing.
 
+## Swath footprints (registered 2026-11-13)
+
+`backend/scripts/fetch_swaths.py` downloads granule outline polygons from NASA's public Common
+Metadata Repository (`https://cmr.earthdata.nasa.gov/search/granules.json`; no credentials).
+These are the same outlines FIRMS shows as "Satellite Swath Outlines". Collections:
+
+- MODIS: `MOD14` and `MYD14`, version 6.1NRT (LANCEMODIS)
+- NOAA-20: `VJ114IMG_NRT` v2
+- NOAA-21: `VJ214IMG_NRT` v2
+
+Each dataset gets two files:
+
+- `data/global/<dataset>/swaths.json`: satellite, start and end time, day/night flag, granule
+  ID and 4 corners for every granule.
+- `data/global/<dataset>/swaths_metadata.json`: query, retrieval time, per-collection counts,
+  SHA-256 of `swaths.json`, and validation results.
+
+Both files are committed. NRT granules age out of the catalogue, so they cannot be
+re-downloaded later.
+
+Validation stored in each sidecar: the share of the dataset's own detections that fall inside
+the same satellite's footprints at their acquisition time. It is **100%** for every satellite
+(Aqua 46,978, Terra 26,723, NOAA-20 385,903, NOAA-21 381,656 catalogued detections). Detections
+in catalogue gaps are counted separately and excluded:
+
+| Satellite | Not checked: before the first catalogued granule or in a gap |
+|---|---:|
+| Aqua | 4,743 |
+| Terra | 2,814 |
+| NOAA-20 | 30,668 |
+| NOAA-21 | 40,988 |
+
 ## Legacy local files and API imports (original foundation)
 
 ### Status

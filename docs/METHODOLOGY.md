@@ -65,23 +65,73 @@ this period. Only NOAA-20 ↔ NOAA-21 is near-simultaneous.
 
 ## 4. Non-detection vs. no observation
 
-FIRMS distributes detections only, with no swath footprints or cloud masks. An unmatched
-cell-overpass therefore has three possible meanings that the data cannot fully separate:
-the other sensor did not look, it looked but clouds blocked it, or it looked and detected
-nothing (fire below its detection limit, or fire changed).
+FIRMS detection files list fires only. On its own, an unmatched cell-overpass (A saw fire,
+B did not) could mean: B was not looking there, B looked but clouds blocked it, or B looked
+and detected nothing (a fire below its detection limit, or one that changed).
 
-FireSync uses an explicit **coverage proxy**. If sensor B produced *any* detection in the
-same 1° cell within the window, B imaged that region at that time. The unmatched A overpass
-is then counted as **"B viewed area, no detection in cell"**. Otherwise it is **"B coverage
-unknown"**. Agreement rates use only proxy-observed cases:
+### Swath footprints (primary method)
+
+FireSync separates "not looking" from "looked, no detection" using **swath footprints**. These
+are the outline polygons of every Level-2 active-fire granule (6-minute VIIRS, 5-minute MODIS),
+the same data behind the FIRMS "Satellite Swath Outlines" layer. They are fetched from NASA's
+public Common Metadata Repository by `backend/scripts/fetch_swaths.py`:
+
+| Dataset | Collections | Granules | Catalogue starts |
+|---|---|---:|---|
+| `modis` | `MOD14` 6.1NRT (Terra), `MYD14` 6.1NRT (Aqua) | 2,068 + 2,068 | 2026-11-06 14:05 / 14:15 UTC |
+| `noaa20` | `VJ114IMG_NRT` v2 | 1,731 | 2026-11-06 01:54 UTC |
+| `noaa21` | `VJ214IMG_NRT` v2 | 1,721 | 2026-11-06 02:54 UTC |
+
+Each footprint is a 4-corner GEODETIC polygon (great-circle edges, convex, counter-clockwise).
+Containment is tested on the unit sphere, so granules crossing the antimeridian or the poles
+are handled exactly. FIRMS acquisition times are truncated to the minute, so ±3 minutes of
+slack lets a detection match a neighbouring granule; each granule is still tested with its
+own polygon.
+
+**Validation.**
+- **Own detections:** every catalogued detection of every satellite falls inside one of its
+  own footprints. That is 100% of 46,978 Aqua, 26,723 Terra, 385,903 NOAA-20 and 381,656
+  NOAA-21 detections.
+- **Negative control:** moving the same detections 180° in longitude puts 0% inside, and
+  moving them 30° east puts about 1% inside.
+- **Area:** one granule covers about 7.4 million km² (VIIRS) or 4.9 million km² (MODIS),
+  consistent with swath width × granule duration.
+
+**Classification.** An unmatched A cell-overpass at time t is put in one category:
+
+- **"In B's swath, no detection"**: a B granule overlapping [t − window, t + window] had the
+  fire location (mean of A's detections) in view.
+- **"Not in B's swath"**: the catalogue is complete for the whole window, and no B granule had
+  the location in view.
+- **"B catalogue gap (unknown)"**: not in view of any catalogued granule, and the window is
+  not fully catalogued. NRT granules age out of the catalogue (the first ~2–14 hours of
+  6 Nov are missing) and a few granules are absent. Inside a gap FireSync cannot say whether
+  B looked.
+- **"B look already paired"**: B's nearest look at this cell was matched one-to-one to
+  another A look. Reported separately, so it is neither a miss nor a hit.
 
 ```
-conditional co-detection rate (A→B) = co-detected / (co-detected + B viewed area, no detection)
+conditional co-detection rate (A→B) = co-detected / (co-detected + in B's swath, no detection)
 ```
 
-"Coverage unknown" is never counted as disagreement, and "no detection" is never presented
-as "no fire". The proxy can still include cloud-obscured cells, so the rate is a lower bound
-on true detection agreement.
+"Not in swath", "unknown" and "already paired" never count toward the rate, and "no
+detection" is never presented as "no fire".
+
+**What footprints do not show.** A footprint says the location was within view, not that it
+was cloud-free, so some "in swath, no detection" cases are clouds. NASA also notes the
+outlines are imprecise at swath edges. The own-detection validation found no misses there,
+but a location just outside a true edge could still be counted as in view. Co-detection
+rates are therefore conservative with respect to clouds, but not a strict bound.
+
+### Coarse-cell proxy (fallback)
+
+If a dataset has no footprints, FireSync falls back to the earlier proxy: B counts as having
+viewed the area if it detected anything in the same 1° cell within the window. The API
+reports which method each side used (`coverage_method`).
+
+**The proxy is biased.** It only recognises B as looking where B also detected fire nearby.
+With footprints, the NOAA-21 → Aqua co-detection rate falls from 0.26 (proxy) to 0.14. For
+NOAA-20 ↔ NOAA-21 the rates barely change (0.56 → 0.555).
 
 ## 5. FRP comparison and calibration
 
@@ -107,15 +157,18 @@ bootstrap CIs (400 resamples). At least 30 pairs are needed in both training and
 
 ## 6. Results (global, all dates)
 
-| Pair | Grid | Window | Pairs | median abs Δt | co-det A→B | co-det B→A | log-FRP r / ρ | median FRP B/A [95% CI] | Calibration | held-out median abs error (log10): fit vs 1:1 |
+| Pair | Grid | Window | Pairs | median abs Δt | co-det A→B* | co-det B→A* | log-FRP r / ρ | median FRP B/A [95% CI] | Calibration | held-out median abs error (log10): fit vs 1:1 |
 |---|---|---|---:|---|---|---|---|---|---|---|
-| NOAA-20 ↔ NOAA-21 | 0.05° | ±60 | 76,741 | 45 min | 0.49 | 0.50 | 0.70 / 0.67 | 1.175 [1.165, 1.185] | slope 0.978 [0.972, 0.985] | 0.280 vs 0.288 |
-| NOAA-20 ↔ NOAA-21 | **0.1°** | ±60 | 68,494 | 45 min | 0.56 | 0.57 | 0.72 / 0.69 | 1.176 [1.165, 1.185] | slope 0.980 [0.975, 0.986] | 0.278 vs 0.286 |
-| NOAA-20 ↔ NOAA-21 | 0.25° | ±60 | 50,711 | 45 min | 0.68 | 0.69 | 0.77 / 0.75 | 1.172 [1.161, 1.186] | slope 0.982 [0.977, 0.989] | 0.281 vs 0.287 |
-| Aqua MODIS ↔ NOAA-20 | 0.1° | ±180 | 13,925 | 128 min | 0.62 | 0.26 | 0.46 / 0.43 | 0.98 [0.96, 1.01] | **refused** (not simultaneous) | — |
-| Aqua MODIS ↔ NOAA-21 | 0.1° | ±180 | 13,718 | 131 min | 0.60 | 0.26 | 0.46 / 0.42 | 1.16 [1.13, 1.20] | **refused** (not simultaneous) | — |
-| MODIS ↔ NOAA-20 (strict) | 0.1° | ±60 | 282 | 55 min | 0.59 | 0.25 | 0.56 / 0.47 | 0.64 [0.55, 0.77] | fitted, **worse than 1:1** | 0.291 vs 0.184 |
-| MODIS ↔ NOAA-21 (strict) | 0.1° | ±60 | 125 | 58 min | 0.58 | 0.29 | 0.55 / 0.51 | 0.78 [0.65, 0.86] | insufficient data | — |
+| NOAA-20 ↔ NOAA-21 | 0.05° | ±60 | 76,741 | 45 min | 0.495 | 0.490 | 0.70 / 0.67 | 1.175 [1.165, 1.185] | slope 0.978 [0.972, 0.985] | 0.280 vs 0.288 |
+| NOAA-20 ↔ NOAA-21 | **0.1°** | ±60 | 68,494 | 45 min | 0.555 | 0.549 | 0.72 / 0.69 | 1.176 [1.165, 1.185] | slope 0.980 [0.975, 0.986] | 0.278 vs 0.286 |
+| NOAA-20 ↔ NOAA-21 | 0.25° | ±60 | 50,711 | 45 min | 0.643 | 0.635 | 0.77 / 0.75 | 1.172 [1.161, 1.186] | slope 0.982 [0.977, 0.989] | 0.281 vs 0.287 |
+| Aqua MODIS ↔ NOAA-20 | 0.1° | ±180 | 13,925 | 128 min | 0.588 | 0.138 | 0.46 / 0.43 | 0.98 [0.96, 1.01] | **refused** (not simultaneous) | — |
+| Aqua MODIS ↔ NOAA-21 | 0.1° | ±180 | 13,718 | 131 min | 0.566 | 0.141 | 0.46 / 0.42 | 1.16 [1.13, 1.20] | **refused** (not simultaneous) | — |
+| MODIS ↔ NOAA-20 (strict) | 0.1° | ±60 | 282 | 55 min | 0.348 | 0.061 | 0.56 / 0.47 | 0.64 [0.55, 0.77] | fitted, **worse than 1:1** | 0.291 vs 0.184 |
+| MODIS ↔ NOAA-21 (strict) | 0.1° | ±60 | 125 | 58 min | 0.291 | 0.063 | 0.55 / 0.51 | 0.78 [0.65, 0.86] | insufficient data | — |
+
+\* Co-detection rates use swath footprints (§4). The FRP columns do not depend on the
+coverage method.
 
 Overpass-order test, NOAA-20 ↔ NOAA-21, 0.1°: NOAA-21/NOAA-20 = **1.179** [1.167, 1.191]
 when NOAA-20 looked first (39,890 pairs) and **1.171** [1.156, 1.189] when NOAA-21 looked
@@ -138,11 +191,18 @@ first (28,603 pairs).
    VIIRS. The few truly close pairs (≤ 60 min) yield a fit that is worse than 1:1 on held-out
    dates, and FireSync labels it that way. Their detections can still be compared spatially
    and in counts, but not as simultaneous measurements.
-4. **Detection asymmetry is expected.** Where VIIRS viewed the area, it co-detects about 60%
-   of Aqua MODIS cell-overpasses. MODIS co-detects only about 26% of VIIRS ones. This fits
-   VIIRS's smaller pixels detecting smaller and cooler fires that fall below the MODIS limit.
-   Do not read it as a VIIRS false-alarm rate.
-5. **Agreement grows with coarser cells** (co-detection 0.49 → 0.68 from 0.05° to 0.25°),
+4. **Detection asymmetry is expected.**
+   - **VIIRS confirms MODIS:** when an Aqua MODIS fire location was within a VIIRS swath
+     (±3 h), VIIRS also detected fire in that cell about 57–59% of the time.
+   - **MODIS confirms VIIRS far less:** when a VIIRS fire location was within an Aqua swath,
+     Aqua detected fire there only about 14% of the time.
+   - **Likely reasons:** VIIRS's smaller pixels pick up smaller, cooler fires below the MODIS
+     detection limit, and fires change over the 2+ hours between looks. Do not read this as a
+     VIIRS false-alarm rate.
+   - **Even near-simultaneous VIIRS pairs disagree a lot:** the two VIIRS satellites, about
+     45 min apart and both in view, co-detect only about 55% of each other's fire looks. Short
+     fire lifetimes, clouds and detection near the threshold limit agreement.
+5. **Agreement grows with coarser cells** (co-detection 0.49 → 0.64 from 0.05° to 0.25°),
    as expected when geolocation offsets and fire-front motion are absorbed. The FRP ratio and
    slope stay stable, so the FRP conclusions do not depend on grid choice.
 
@@ -157,9 +217,16 @@ first (28,603 pairs).
 - The pairing algorithm recovers a known synthetic relationship (slope 1, ×2 offset, 50-min
   lag) and refuses calibration for a 3-hour lag (unit tests).
 - The NOAA-20 ↔ NOAA-21 relationship and its order-independence on held-out dates.
+- Swath-footprint geometry and timing. 100% of 841,260 catalogued own-satellite detections
+  fall inside their own footprints, and the negative control gives 0%. Spherical containment
+  is unit-tested across the antimeridian and the pole, and catalogue gaps are unit-tested to
+  give "unknown".
 
 **Experimental / limitations:**
-- The coverage proxy has no cloud information, so co-detection rates are lower bounds.
+- Swath footprints show what was in view, not cloud cover. Some "in swath, no detection"
+  cases are clouds, and outlines are approximate at swath edges.
+- Footprints are missing for the first hours of 6 Nov and for a few granules. Those looks
+  are reported as "unknown".
 - Bootstrap CIs resample pairs independently and understate uncertainty from spatial and
   temporal autocorrelation. With only 8 days of data, a block-by-day bootstrap is not yet
   meaningful.
@@ -167,7 +234,8 @@ first (28,603 pairs).
 - NRT products only. Standard-processing (SP) data may revise detections and FRP.
 - Results describe 6–13 November 2026 and the regions burning then (dominated by the
   African savanna burning season). They are not a global transfer function.
-- Planar point-in-polygon and lat/lon boxes do not cross the antimeridian.
+- User-drawn areas (planar point-in-polygon) and lat/lon boxes do not cross the antimeridian.
+  Footprint tests do.
 - No multi-year archive is loaded, so there is no historical calendar, seasonal baseline, or
   anomaly detection, and none is simulated.
 

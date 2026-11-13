@@ -24,7 +24,7 @@ export default function Methodology() {
         </article>
         <article>
           <h3>5 · Non-detection ≠ no observation</h3>
-          <p>FIRMS lists detections only. An unmatched overpass is classified with a coverage proxy: if the other sensor detected anything in the same 1° cell within the window, the area was imaged (“viewed, no detection”); otherwise coverage is “unknown” and excluded from agreement rates.</p>
+          <p>FIRMS lists detections only. FireSync adds NASA swath footprints (one outline per 5–6 min granule, from the public CMR catalogue) to tell “in view, no detection” from “not in view”. Catalogue gaps are “unknown”. 100% of each satellite's own detections fall inside its own footprints. Footprints show what was in view, not clouds. Only in-view cases count toward agreement rates.</p>
         </article>
         <article>
           <h3>6 · Calibration only when defensible</h3>

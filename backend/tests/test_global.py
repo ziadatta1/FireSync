@@ -226,3 +226,98 @@ def test_registered_real_datasets_match_their_provenance():
         assert payload.count(b"\n") - 1 == meta["row_count"]
         assert meta["duplicate_rows"] == 0 and meta["invalid_rows"] == 0
     global_data._cache.clear()
+
+
+# --------------------------------------------------------------------------- swath footprints
+
+from app import swaths  # noqa: E402
+
+
+def _granule(start, end, south, west, north, east, sat="N21"):
+    # counter-clockwise seen from space: SW -> SE -> NE -> NW
+    return {"satellite": sat, "start": start, "end": end, "day_night": "D", "granule": f"g{start}",
+            "corners": [[south, west], [south, east], [north, east], [north, west]]}
+
+
+def _write_swaths(folder, granules):
+    (folder / "swaths.json").write_text(json.dumps({"dataset": folder.name, "granules": granules}))
+    swaths.clear_cache()
+
+
+def _continuous(day, h0, h1, big=None, sat="N21"):
+    """6-minute granules from h0 to h1 (hours); a small far-away polygon unless `big` matches."""
+    out = []
+    t = int(h0 * 60)
+    while t < int(h1 * 60):
+        start = f"{day}T{t // 60:02d}:{t % 60:02d}:00Z"
+        end_t = t + 6
+        end = f"{day}T{end_t // 60:02d}:{end_t % 60:02d}:00Z"
+        box = big if big and big[0] == t else (None, 60, 100, 61, 101)
+        out.append(_granule(start, end, *box[1:], sat=sat))
+        t += 6
+    return out
+
+
+def test_footprints_classify_viewed_not_viewed(client, fixture_store):
+    # Continuous catalogue 10:00-14:00; one granule at 12:42 covers lat 5-35, lon 15-25.
+    _write_swaths(fixture_store / "noaa21", _continuous("2026-01-01", 10, 14, big=(12 * 60 + 42, 5, 15, 35, 25)))
+    r = client.get("/api/global/compare", params={"a": "noaa20", "b": "noaa21", "cell": 0.1, "window": 60}).json()
+    a = r["a_side"]
+    assert a["coverage_method"] == "swath_footprint"
+    assert a["co_detected"] == 200
+    assert a["other_viewed_area_no_detection"] == 1  # (10.73, 20.73) inside the 12:42 footprint
+    assert a["other_not_in_view"] == 1  # (-40, -60) catalogued but outside every footprint
+    assert a["other_coverage_unknown"] == 0
+    assert a["conditional_co_detection_rate"] == pytest.approx(200 / 201, abs=1e-4)
+    assert r["b_side"]["coverage_method"] == "coarse_cell_proxy"  # NOAA-20 has no footprints in the fixture
+
+
+def test_footprints_catalogue_gap_is_unknown(client, fixture_store):
+    # Catalogue only 11:30-12:30: the window 10:57-13:03 around 12:00 is not fully catalogued.
+    _write_swaths(fixture_store / "noaa21", _continuous("2026-01-01", 11.5, 12.5, big=(12 * 60, 5, 15, 35, 25)))
+    a = client.get("/api/global/compare", params={"a": "noaa20", "b": "noaa21"}).json()["a_side"]
+    assert a["other_viewed_area_no_detection"] == 1  # a covering granule was still found
+    assert a["other_not_in_view"] == 0
+    assert a["other_coverage_unknown"] == 1  # outside footprints, but inside a catalogue gap
+
+
+def test_footprint_geometry_antimeridian_and_pole(tmp_path, monkeypatch):
+    monkeypatch.setattr(global_data, "GLOBAL_DIR", tmp_path)
+    folder = tmp_path / "noaa21"
+    folder.mkdir()
+    _write_swaths(folder, [
+        _granule("2026-01-01T00:00:00Z", "2026-01-01T00:06:00Z", -10, 170, 10, -170),  # crosses 180
+        {"satellite": "N21", "start": "2026-01-01T00:06:00Z", "end": "2026-01-01T00:12:00Z", "day_night": "D",
+         "granule": "polar", "corners": [[80, 0], [80, 90], [80, 180], [80, -90]]},  # cap around the pole
+    ])
+    fp = swaths.load("noaa21")
+    t0 = float(np.datetime64("2026-01-01T00:03", "m").astype(np.int64))
+    t1 = t0 + 6
+    lat = np.array([0, 0, 0, 89.5, 70.0])
+    lon = np.array([179.5, -179.5, 0.0, 45.0, 0.0])
+    t = np.array([t0, t0, t0, t1, t1])
+    assert fp.contains(lat, lon, t, 0, "N21").tolist() == [True, True, False, True, False]
+    assert fp.known_at(np.array([t0]), "N21", 0).tolist() == [True]
+    assert fp.known_at(np.array([t0 + 60]), "N21", 0).tolist() == [False]
+    swaths.clear_cache()
+
+
+def test_one_to_one_loser_is_reported_as_paired_elsewhere():
+    import pandas as pd
+    a = pd.DataFrame({"cell": [1, 1], "coarse": [1, 1], "t": [0, 100], "frp": [1.0, 1.0], "n": [1, 1]})
+    b = pd.DataFrame({"cell": [1], "coarse": [1], "t": [50], "frp": [1.0], "n": [1]})
+    m = compare._match(a, b, 60)
+    assert m["b_id"].notna().sum() == 1
+    assert m["raw_hit"].tolist() == [True, True]  # both were in range; one lost the one-to-one tie
+
+
+@pytest.mark.skipif(not (REAL / "noaa21" / "swaths_metadata.json").exists(), reason="footprints not fetched")
+def test_registered_footprints_contain_their_own_detections():
+    for name in global_data.available_sources():
+        meta_path = REAL / name / "swaths_metadata.json"
+        if not meta_path.exists():
+            continue
+        meta = json.loads(meta_path.read_text())
+        assert hashlib.sha256((REAL / name / "swaths.json").read_bytes()).hexdigest() == meta["sha256"]
+        for sat, v in meta["validation_own_detections_inside_own_footprint"].items():
+            assert v["inside_fraction"] is not None and v["inside_fraction"] >= 0.999, (name, sat)
