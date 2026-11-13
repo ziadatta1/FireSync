@@ -194,6 +194,22 @@ def compare(
         sample = rng.choice(len(x), size=min(SCATTER_MAX, len(x)), replace=False)
         frp_block["scatter_sample_log10"] = np.round(np.column_stack([x[sample], y[sample]]), 3).tolist()
 
+        # Order test: if B/A differs only because fires evolve between looks, the ratio
+        # should flip depending on which sensor looked first.  A ratio that is the
+        # same in both orders points to a sensor (not temporal) difference.
+        order: Dict[str, Any] = {}
+        dts = valid["t_b"].to_numpy() - valid["t"].to_numpy()
+        for key, sub in (("b_later", dts > 0), ("b_earlier", dts < 0)):
+            if sub.sum() >= 10:
+                diffs = (y - x)[sub]
+                boot_o = [np.median(diffs[s]) for s in (rng.integers(0, len(diffs), len(diffs)) for _ in range(BOOTSTRAP // 2))]
+                order[key] = {
+                    "pairs": int(sub.sum()),
+                    "median_ratio_b_over_a": round(float(10 ** np.median(diffs)), 4),
+                    "ci95": [round(float(10 ** np.percentile(boot_o, 2.5)), 4), round(float(10 ** np.percentile(boot_o, 97.5)), 4)],
+                }
+        frp_block["order_test"] = order
+
     calibration: Dict[str, Any] = {"status": "not_computed"}
     days = sorted(valid["day"].unique().tolist()) if len(valid) else []
     if median_abs_dt is None or median_abs_dt > CALIBRATION_MAX_MEDIAN_DT_MIN:

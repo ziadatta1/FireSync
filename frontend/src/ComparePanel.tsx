@@ -10,6 +10,27 @@ const PRESETS: { label: string; hint: string; config: Config }[] = [
   { label: 'MODIS ↔ NOAA-21, strict ±60 min', hint: 'Only the few truly close overpasses', config: { a: 'modis', b: 'noaa21', satA: '', window: 60, cell: 0.1 } },
 ]
 
+function relGain(cal: CompareResponse['calibration']) {
+  const fit = cal.validation_fitted?.median_abs_error_log10, base = cal.validation_identity_baseline?.median_abs_error_log10
+  return fit !== undefined && base ? (base - fit) / base : 0
+}
+
+function slopeVerdict(slope: number, ci?: [number, number]) {
+  if (!ci || !Number.isFinite(slope)) return ''
+  if (ci[0] <= 1 && ci[1] >= 1) return 'The slope is statistically consistent with 1: the sensors scale alike, differing by a constant factor.'
+  if (Math.abs(slope - 1) < 0.05) return `The slope (${slope.toFixed(3)}) is within 5% of 1. Its narrow interval excludes 1, but those intervals understate uncertainty, so in practice the relationship is close to a constant factor.`
+  return `The slope (${slope.toFixed(3)}) differs materially from 1: the sensors do not scale alike across the FRP range.`
+}
+
+function gainVerdict(fit?: number, base?: number) {
+  if (fit === undefined || base === undefined) return ''
+  if (fit >= base) return 'On held-out dates the fit does NOT reduce error versus 1:1, so applying it is not justified.'
+  const gain = (base - fit) / base
+  return gain < 0.05
+    ? `On held-out dates it reduces median error by only ${(gain * 100).toFixed(0)}%. Scatter from fire variability between looks dominates, and the 1:1 assumption is nearly as good.`
+    : `On held-out dates it reduces median error by ${(gain * 100).toFixed(0)}% versus 1:1.`
+}
+
 function SideBar({ side, label, other, color }: { side: Side; label: string; other: string; color: string }) {
   const total = side.cell_overpasses || 1
   const seg = [
@@ -106,13 +127,30 @@ export default function ComparePanel({ filters, area }: { filters: Filters; area
             </div>
             <div className="chart-card">
               <h3>Time offset of paired looks <small>t({nameB}) − t({nameA}), minutes</small></h3>
-              <GroupedBars categories={r.timing.dt_histogram.edges.slice(0, -1).map(String)} formatCategory={(c) => `${Number(c) > 0 ? '+' : ''}${c}`} valueLabel="Time offset histogram" series={[{ key: 'dt', label: 'pairs', color: SOURCES[r.source_b].color, values: r.timing.dt_histogram.counts }]} height={180} />
+              <GroupedBars categories={r.timing.dt_histogram.edges.slice(0, -1).map(String)} formatCategory={(c) => `${Number(c) > 0 ? '+' : ''}${c}`} valueLabel="Time offset histogram" series={[{ key: 'dt', label: 'pairs', color: SOURCES[r.source_b].color, values: r.timing.dt_histogram.counts }]} height={190} width={400} />
+              {r.frp.order_test?.b_later && r.frp.order_test?.b_earlier && (() => {
+                const later = r.frp.order_test.b_later!, earlier = r.frp.order_test.b_earlier!
+                const overlap = later.ci95[0] <= earlier.ci95[1] && earlier.ci95[0] <= later.ci95[1]
+                return (
+                  <div className="calibration-card order">
+                    <h4>Overpass-order test · {overlap ? 'ratio is order-independent' : 'ratio depends on order'}</h4>
+                    <table className="data-table compact">
+                      <thead><tr><th>Which looked first?</th><th>Pairs</th><th>Median {nameB}/{nameA}</th><th>95% CI</th></tr></thead>
+                      <tbody>
+                        <tr><td>{nameA} first</td><td>{fmt(later.pairs)}</td><td>{fmt(later.median_ratio_b_over_a, 3)}</td><td>{fmt(later.ci95[0], 3)}–{fmt(later.ci95[1], 3)}</td></tr>
+                        <tr><td>{nameB} first</td><td>{fmt(earlier.pairs)}</td><td>{fmt(earlier.median_ratio_b_over_a, 3)}</td><td>{fmt(earlier.ci95[0], 3)}–{fmt(earlier.ci95[1], 3)}</td></tr>
+                      </tbody>
+                    </table>
+                    <p>{overlap ? `If the FRP difference were caused by fires growing or fading between looks, it would reverse when the order reverses. It does not, which points to a ${nameB}–${nameA} measurement difference rather than fire evolution.` : 'The ratio changes with overpass order, so part of the difference reflects fire evolution between looks, not only the sensors.'}</p>
+                  </div>
+                )
+              })()}
               <div className={`calibration-card ${cal.status}`}>
-                <h4>Cross-sensor FRP calibration · {cal.status === 'fitted' ? (cal.improves_on_identity ? 'fitted, validated' : 'fitted, does NOT beat 1:1') : cal.status.replace('_', ' ')}</h4>
+                <h4>Cross-sensor FRP calibration · {cal.status === 'fitted' ? (!cal.improves_on_identity ? 'fitted, does NOT beat 1:1' : relGain(cal) < 0.05 ? 'fitted, marginal gain over 1:1' : 'fitted, improves on 1:1') : cal.status.replace('_', ' ')}</h4>
                 {cal.status === 'fitted' ? (
                   <>
                     <p className="mono">log₁₀ FRP<sub>{nameB}</sub> = {fmt(cal.intercept, 3)} + {fmt(cal.slope, 3)} · log₁₀ FRP<sub>{nameA}</sub></p>
-                    <p className="verdict">{cal.slope_95ci && cal.slope_95ci[0] <= 1 && cal.slope_95ci[1] >= 1 ? 'Slope is statistically consistent with 1 — the sensors scale alike; only a constant offset is suggested.' : 'Slope differs from 1 — the relationship is not a simple constant offset.'} {cal.improves_on_identity ? 'The fit reduces held-out error versus 1:1.' : 'The fit does NOT reduce held-out error versus 1:1, so applying it is not justified.'}</p>
+                    <p className="verdict">{slopeVerdict(cal.slope ?? NaN, cal.slope_95ci)} {gainVerdict(cal.validation_fitted?.median_abs_error_log10, cal.validation_identity_baseline?.median_abs_error_log10)}</p>
                     <p>Slope 95% CI {fmt(cal.slope_95ci?.[0], 3)}–{fmt(cal.slope_95ci?.[1], 3)}. Reduced-major-axis fit on {fmt(cal.train_pairs)} pairs from {cal.train_dates?.[0]}…{cal.train_dates?.[cal.train_dates.length - 1]}; validated on {fmt(cal.validation_pairs)} held-out pairs from {cal.validation_dates?.join(', ')}.</p>
                     <table className="data-table compact">
                       <thead><tr><th>Held-out error (log₁₀)</th><th>Fitted</th><th>1:1 baseline</th></tr></thead>

@@ -139,9 +139,12 @@ function AreaTool({ mode, setMode, area, onArea }: { mode: DrawMode; setMode: (m
     shapeRef.current = null
     if (!area) return
     const style = { color: '#c5ee79', weight: 2, fillOpacity: 0.06, dashArray: '6 4', interactive: false }
-    shapeRef.current = area.kind === 'bbox'
+    const shape = area.kind === 'bbox'
       ? L.rectangle([[area.south, area.west], [area.north, area.east]], style).addTo(map)
       : L.polygon(area.vertices, style).addTo(map)
+    shapeRef.current = shape
+    // Areas typed as coordinates may be off-screen: bring them into view.
+    if (map.getSize().x > 0 && !map.getBounds().contains(shape.getBounds())) map.fitBounds(shape.getBounds(), { padding: [30, 30] })
   }, [map, area])
 
   useEffect(() => {

@@ -110,6 +110,7 @@ export type CompareResponse = {
     median_ratio_95ci?: [number, number]
     median_pixels_per_pair?: { a: number; b: number }
     scatter_sample_log10?: [number, number][]
+    order_test?: Partial<Record<'b_later' | 'b_earlier', { pairs: number; median_ratio_b_over_a: number; ci95: [number, number] }>>
   }
   calibration: {
     status: 'fitted' | 'not_supported' | 'insufficient_data' | 'not_computed'

@@ -63,7 +63,7 @@ export default function AnalyticsPanel({ filters, area, onFocus }: {
             </div>
             <div className="chart-card">
               <h3>Detections by hour <small>UTC · reflects overpass schedule, not fire timing</small></h3>
-              <GroupedBars categories={Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0'))} valueLabel="Detections by UTC hour" series={series((s) => stats.sources[s]!.hourly_utc)} height={170} />
+              <GroupedBars categories={Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0'))} valueLabel="Detections by UTC hour" series={series((s) => stats.sources[s]!.hourly_utc)} height={200} width={400} />
             </div>
             <div className="chart-card">
               <h3>FRP distribution <small>detections per FRP bin (MW, lower edge)</small></h3>
@@ -72,13 +72,13 @@ export default function AnalyticsPanel({ filters, area, onFocus }: {
                 formatCategory={(c) => `≥${c}`}
                 valueLabel="FRP histogram"
                 series={series((s) => stats.sources[s]!.frp_histogram.counts)}
-                height={170}
+                height={200} width={400}
                 note="Pixel FRP is not comparable 1:1 across sensors: MODIS pixels are ~7× larger in area than VIIRS 375 m pixels."
               />
             </div>
             <div className="chart-card">
               <h3>Confidence class <small>FIRMS classes; MODIS 0–100 mapped &lt;30 / 30–79 / ≥80</small></h3>
-              <GroupedBars categories={['low', 'nominal', 'high']} valueLabel="Confidence classes" series={series((s) => { const c = stats.sources[s]!.confidence; return [c.low, c.nominal, c.high] })} height={170} />
+              <GroupedBars categories={['low', 'nominal', 'high']} valueLabel="Confidence classes" series={series((s) => { const c = stats.sources[s]!.confidence; return [c.low, c.nominal, c.high] })} height={200} width={400} />
             </div>
             <div className="chart-card">
               <h3>FRP statistics <small>MW per detection</small></h3>

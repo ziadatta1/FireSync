@@ -1,97 +1,157 @@
 # FireSync
 
-FireSync is a local dashboard for viewing summaries and a clustered map of the
-existing MODIS and VIIRS CSV files. Both files are labeled **UNVERIFIED LOCAL
-DATA**. Their provenance has not been confirmed; the application does not claim
-they are authenticated NASA observations. New FIRMS downloads are written to a
-separate versioned import directory with provenance sidecars. See
-[DATA_PROVENANCE.md](DATA_PROVENANCE.md).
+**Global multi-satellite active-fire monitoring and sensor comparison.** Team *We Are Aliens*, NASA Space Apps Challenge Cairo 2026.
 
-## Requirements
+FireSync maps about 920,000 real NASA FIRMS active-fire detections from three satellite sources:
 
-- Python 3.9 or newer
-- Node.js 20.19+ or 22.12+ and npm
+- MODIS (Terra + Aqua)
+- VIIRS NOAA-20
+- VIIRS NOAA-21
 
-## Run the backend
+It analyzes any area you draw and compares the satellites with a paired spatio-temporal method.
 
-From the project root:
+The sources stay separate throughout. Nothing is averaged or merged across sensors, and every
+number on screen comes from the data. See [docs/METHODOLOGY.md](docs/METHODOLOGY.md) for the
+science, [DATA_PROVENANCE.md](DATA_PROVENANCE.md) for where every file came from, and
+[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) for a 5-minute walkthrough.
+
+![Global map](docs/screenshots/01-global-map.jpg)
+
+## Features
+
+| View | What it does |
+|---|---|
+| **Global map & area analysis** | Canvas-rendered map. Detections are aggregated server-side into 2° → 0.1° cells as you zoom, and become individual detections at zoom ≥ 7. Each source has its own color and shape (MODIS ■, NOAA-20 ●, NOAA-21 ◆). Click a cell for per-source counts, or a detection for its full source record. Filter by source, UTC date, confidence class and day/night. Draw a **box** or **polygon**, or type coordinates, to get per-satellite totals, daily and hourly activity, FRP distribution and statistics, confidence classes, top active cells (click to fly there), and a **CSV export** of the exact source rows. |
+| **Sensor comparison** | Paired cell-overpass matching on a common grid with a time window. It reports co-detection rates and separates "not detected" from "not observed" with a coverage proxy. It also shows the distribution of overpass time offsets, a paired FRP scatter, an overpass-order test, and a calibration that is validated on held-out dates against 1:1. Calibration is refused when the sensors don't observe simultaneously. Presets cover NOAA-20 ↔ NOAA-21 and Aqua MODIS ↔ VIIRS. Runs globally or inside the drawn area. |
+| **Data & provenance** | Per-dataset row counts, a daily strip, SHA-256, quality checks, and an exact-row cross-check against direct FIRMS API retrievals. The original FireSync local-file / API-import map is kept here unchanged. |
+| **Methodology** | Summary of the method and its limits. |
+
+## Quick start
+
+Requirements: Python 3.9+ and Node.js 20.19+ or 22.12+.
+
+**1. Backend** (from the project root):
 
 ```sh
 python3 -m venv backend/.venv
-source backend/.venv/bin/activate
-python -m pip install -r backend/requirements.txt
-uvicorn app.main:app --app-dir backend --env-file backend/.env --reload --host 127.0.0.1 --port 8000
+backend/.venv/bin/python -m pip install -r backend/requirements.txt
 ```
-
-The API is available at `http://127.0.0.1:8000`. Interactive API docs are at
-`http://127.0.0.1:8000/docs`.
-
-### Optional NASA FIRMS imports
-
-Request a free `MAP_KEY` from the [NASA FIRMS API page](https://firms.modaps.eosdis.nasa.gov/api/).
-Set it only in the backend process environment; it is never read by or returned
-to the frontend:
 
 ```sh
-export FIRMS_MAP_KEY="<your MAP_KEY>"
+backend/.venv/bin/uvicorn app.main:app --app-dir backend --env-file backend/.env --host 127.0.0.1 --port 8000
 ```
 
-The backend exposes `GET /api/firms/status` to report whether a non-placeholder
-key is configured, `POST /api/firms/import` to fetch a selected source, and
-`GET /api/firms/imports` to list stored provenance records. An import request
-accepts `sensor` (`modis` or `viirs`), optional allowlisted `source`, `area`
-(`world` or `west,south,east,north`), `day_range` (1–5), and optional
-`acquisition_date`.
-Defaults are `MODIS_NRT` and `VIIRS_NOAA21_NRT`. VIIRS also supports
-`VIIRS_NOAA20_NRT` and the NOAA-20/NOAA-21 standard-processing sources.
-Suomi NPP source IDs are retained for explicitly dated historical retrievals;
-they are not used for live requests. Each successful, validated HTTPS CSV
-response is stored under a unique `data/imports/` directory with a UTC
-retrieval timestamp, source/query details, row count, columns, and SHA-256.
-Existing `modis.csv` and `viirs.csv` are not overwritten. FIRMS rate limits and
-provider failures are surfaced without retrying automatically.
-
-## Run the frontend
-
-In another terminal, from the project root:
+**2. Global datasets.** This is already done in this workspace, and only needs repeating on a
+new machine. Download the three FIRMS global 7-day CSVs, then register them:
 
 ```sh
-cd frontend
-npm install
-npm run dev
+backend/.venv/bin/python backend/scripts/register_global.py --modis ~/Downloads/MODIS_C6_1_Global_7d.csv --noaa20 ~/Downloads/J1_VIIRS_C2_Global_7d.csv --noaa21 ~/Downloads/J2_VIIRS_C2_Global_7d.csv
 ```
 
-Open `http://127.0.0.1:5173`. The frontend fetches the summary from the local
-backend. Start both processes to see the dataset cards.
+The large CSVs under `data/global/*/observations.csv` are git-ignored. Their `metadata.json`
+sidecars (with SHA-256) are committed, so a re-download can be verified.
 
-## API endpoints
-
-- `GET /api/health` — process health status.
-- `GET /api/datasets/summary` — row counts, column names, and acquisition date
-  ranges for `modis.csv` and `viirs.csv`. The endpoint reads but does not modify
-  the CSV files. Each dataset and the response carry the unverified status.
-- `GET /api/observations/filters` — available dates, satellite codes,
-  instruments, confidence values, and coordinate validation counts by dataset.
-- `GET /api/observations` — filterable and paginated source rows. Supports
-  repeated `dataset` values (`modis`, `viirs`), `date_from`, `date_to`,
-  `satellite`, `instrument`, exact `confidence`, and an optional complete
-  bounding box (`south`, `west`, `north`, `east`). Pages default to 2,000 rows
-  and are capped at 5,000. Invalid-coordinate rows are counted in the response
-  rather than being silently included on the map.
-
-## Backend tests
-
-With the backend dependencies installed, run from the project root:
+**3. Frontend** (second terminal):
 
 ```sh
-pytest backend/tests
+cd frontend && npm install && npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-The frontend clusters the currently loaded page of markers and paginates each
-enabled dataset so matching rows remain accessible without placing tens of
-thousands of markers on the map at once. Marker clicks show source fields that
-exist in that row. The basemap uses OpenStreetMap standard raster tiles and
-displays OpenStreetMap attribution.
+Open <http://127.0.0.1:5173>. The first request after the API starts loads about 75 MB of
+CSV into memory in about 1 second.
 
-This foundation does not perform scientific harmonization, anomaly detection,
-or other analysis.
+### NASA FIRMS MAP_KEY
+
+`FIRMS_MAP_KEY` lives only in `backend/.env`, which is git-ignored. It is never sent to the
+frontend, logged, or returned by any endpoint. It is only needed for new FIRMS API imports
+(`POST /api/firms/import`), not for the global datasets above. Request a key from the
+[NASA FIRMS API page](https://firms.modaps.eosdis.nasa.gov/api/).
+
+## API
+
+Global datasets (all GET):
+
+| Endpoint | Purpose |
+|---|---|
+| `/api/global/datasets` | Provenance and profile of each registered dataset (no filesystem paths). |
+| `/api/global/grid?cell=…` | Detections per grid cell, per source. `cell` must be one of 0.05, 0.1, 0.25, 0.5, 1 or 2. |
+| `/api/global/points?south&west&north&east&limit` | Individual detections in a box. Capped at `limit` (max 25,000) with an explicit `truncated` flag; the highest-FRP detections are kept. |
+| `/api/global/record/{source}/{row}` | One source row, unchanged. |
+| `/api/global/stats` | Area analysis: totals, daily, hourly, FRP quantiles and histogram, confidence, day/night, satellites, top cells. |
+| `/api/global/compare?a&b&window&cell&satellite_a` | Paired sensor comparison and calibration (see the methodology). |
+| `/api/global/export.csv` | Streams the matching source rows unchanged, plus `dataset`, `firms_source`, `source_sha256` and `source_row`. |
+
+Common filters: repeated `source` (`modis`, `noaa20`, `noaa21`), `date_from`, `date_to`,
+`min_confidence` (`low`/`nominal`/`high`), `daynight` (`D`/`N`), a bounding box
+(`south`, `west`, `north`, `east`; no dateline crossing), or `polygon=lat,lon;lat,lon;…`
+(3–200 vertices). Inputs are validated and return 422 on error. Responses are gzip-compressed.
+
+The original foundation endpoints are unchanged:
+
+- `/api/health`
+- `/api/datasets/summary`
+- `/api/observations`
+- `/api/observations/filters`
+- `/api/firms/status`
+- `/api/firms/imports`
+- `POST /api/firms/import`
+- `/api/firms/imports/{id}/observations`
+
+Interactive docs are at <http://127.0.0.1:8000/docs>.
+
+## Tests
+
+```sh
+backend/.venv/bin/python -m pytest -q backend
+```
+
+```sh
+cd frontend && npm run build
+```
+
+Current result: **48 passed, 1 skipped**. The skip is a pre-existing test, and the suite also
+passes with `-W error::RuntimeWarning`. The production build passes. Tests include synthetic
+datasets with known answers for:
+
+- Grid conservation and point truncation.
+- Polygon, box, confidence and day/night filters.
+- Pairing and the coverage proxy.
+- Recovery of a known calibration, and refusal for non-simultaneous pairs.
+- Common-date restriction.
+- Exact-value export, integrity failure, and path safety.
+
+A further test checks the real registered datasets against their sidecars.
+
+Reproduce the published comparison numbers:
+
+```sh
+backend/.venv/bin/python backend/scripts/run_comparison.py
+```
+
+## Project layout
+
+```
+backend/app/main.py            FastAPI app (foundation + /api/global/*)
+backend/app/global_data.py     columnar dataset store, filters, grid, stats, export
+backend/app/compare.py         paired cell-overpass comparison and calibration
+backend/app/firms.py           FIRMS API client and immutable import storage
+backend/scripts/               register_global.py, run_comparison.py
+frontend/src/GlobalMap.tsx     canvas map, area drawing, record inspector
+frontend/src/DetectionLayer.ts custom Leaflet canvas layer (no DOM markers)
+frontend/src/AnalyticsPanel.tsx, ComparePanel.tsx, DataPanel.tsx, charts.tsx
+frontend/src/WildfireMap.tsx   original foundation map (unchanged)
+data/global/                   registered datasets + provenance sidecars
+data/imports/                  FIRMS API imports + sidecars
+docs/                          methodology, demo guide, comparison results, screenshots
+```
+
+## Limitations
+
+- **Data window.** Eight UTC days of NRT data (6–13 Nov 2026, last day partial). No
+  multi-year archive is loaded, so there is no historical calendar or anomaly baseline, and
+  none is simulated.
+- **Detections, not fires.** Counts are detections. "No detection" is not "no fire".
+- **MODIS ↔ VIIRS calibration.** It isn't supported by this data: the sensors are 2+ hours
+  apart.
+- **Map and area geometry.** Boxes and polygons do not cross the antimeridian. The basemap is
+  Esri World Dark Gray, which needs internet access.

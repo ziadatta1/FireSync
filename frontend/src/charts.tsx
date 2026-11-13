@@ -7,7 +7,8 @@ function niceMax(value: number) {
   if (value <= 0) return 1
   const exp = Math.pow(10, Math.floor(Math.log10(value)))
   const n = value / exp
-  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * exp
+  const step = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find((candidate) => n <= candidate) ?? 10
+  return step * exp
 }
 
 function Legend({ series }: { series: Series[] }) {
@@ -21,20 +22,19 @@ function Legend({ series }: { series: Series[] }) {
 
 /** Grouped vertical bars (one group per category). Null = no data for that source/category. */
 export function GroupedBars({
-  categories, series, height = 190, valueLabel, formatCategory = (c) => c, note,
+  categories, series, height = 190, width = 640, valueLabel, formatCategory = (c) => c, note,
 }: {
-  categories: string[]; series: Series[]; height?: number; valueLabel: string; formatCategory?: (c: string) => string; note?: ReactNode
+  categories: string[]; series: Series[]; height?: number; width?: number; valueLabel: string; formatCategory?: (c: string) => string; note?: ReactNode
 }) {
   const [hover, setHover] = useState<number | null>(null)
-  const width = 640
-  const pad = { l: 52, r: 8, t: 10, b: 28 }
+  const pad = { l: width < 500 ? 44 : 52, r: 8, t: 10, b: 28 }
   const max = niceMax(Math.max(0, ...series.flatMap((s) => s.values.map((v) => v ?? 0))))
   const innerW = width - pad.l - pad.r
   const innerH = height - pad.t - pad.b
   const groupW = innerW / Math.max(categories.length, 1)
   const barW = Math.max(2, Math.min(22, (groupW - 6) / Math.max(series.length, 1) - 2))
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => f * max)
-  const labelEvery = Math.ceil(categories.length / 12)
+  const labelEvery = Math.ceil(categories.length / (width < 500 ? 7 : 12))
   return (
     <div className="chart" onMouseLeave={() => setHover(null)}>
       <Legend series={series} />

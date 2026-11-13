@@ -151,6 +151,8 @@ def test_comparison_pairs_and_coverage_proxy(client):
     assert r["a_side"]["other_coverage_unknown"] == 1
     assert r["timing"]["median_abs_dt_min"] == 50
     assert r["frp"]["median_ratio_b_over_a"] == pytest.approx(2.0, rel=0.01)
+    assert r["frp"]["order_test"]["b_later"]["median_ratio_b_over_a"] == pytest.approx(2.0, rel=0.01)
+    assert "b_earlier" not in r["frp"]["order_test"]  # NOAA-21 is always later in the fixture
 
 
 def test_calibration_recovers_known_relationship_and_validates_out_of_sample(client):
