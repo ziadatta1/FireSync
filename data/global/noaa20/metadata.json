@@ -1,0 +1,91 @@
+{
+  "acquisition": "User-supplied download of the FIRMS global 7-day active fire CSV (not fetched by the FireSync importer).",
+  "acquisition_dates": {
+    "2026-11-06": 55252,
+    "2026-11-07": 60653,
+    "2026-11-08": 58739,
+    "2026-11-09": 63638,
+    "2026-11-10": 66193,
+    "2026-11-11": 50326,
+    "2026-11-12": 49061,
+    "2026-11-13": 12709
+  },
+  "api_cross_checks": [
+    {
+      "api_rows": 32725,
+      "api_rows_in_granules_present_in_download": 12709,
+      "explanation": "Rows not found belong to acquisition granules (acq_date+acq_time) absent from the download, i.e. NRT granules that arrived after one snapshot or the other was taken.",
+      "import_id": "viirs_VIIRS_NOAA20_NRT_20261113T190318Z_65ea65d7",
+      "match_fraction": 0.388358,
+      "match_key": [
+        "latitude",
+        "longitude",
+        "acq_date",
+        "acq_time"
+      ],
+      "matched_within_shared_granules": 12709,
+      "query": {
+        "area": "world",
+        "date": null,
+        "day_range": 1
+      },
+      "retrieved_at": "2026-11-13T19:03:18Z",
+      "rows_found_in_download": 12709,
+      "shared_granule_match_fraction": 1.0
+    }
+  ],
+  "bounds": {
+    "east": 179.85876,
+    "north": 72.48138,
+    "south": -53.10393,
+    "west": -179.99951
+  },
+  "classification": "NASA FIRMS DOWNLOAD (CROSS-CHECKED)",
+  "columns": [
+    "latitude",
+    "longitude",
+    "bright_ti4",
+    "scan",
+    "track",
+    "acq_date",
+    "acq_time",
+    "satellite",
+    "confidence",
+    "version",
+    "bright_ti5",
+    "frp",
+    "daynight"
+  ],
+  "dataset": "noaa20",
+  "date_range": {
+    "end": "2026-11-13",
+    "start": "2026-11-06"
+  },
+  "daynight": {
+    "D": 305626,
+    "N": 110945
+  },
+  "duplicate_rows": 0,
+  "filename_matches_firms_convention": true,
+  "firms_source": "VIIRS_NOAA20_NRT",
+  "invalid_rows": 0,
+  "label": "VIIRS 375 m Collection 2 NRT (NOAA-20 / JPSS-1)",
+  "missing_values": {},
+  "notes": [
+    "NRT (near real-time) product: detections may be revised in the later standard (SP) product.",
+    "Rows are satellite detections of thermal anomalies, not unique fire incidents.",
+    "The final acquisition date is a partial day (file snapshot taken during that UTC day)."
+  ],
+  "original_filename": "J1_VIIRS_C2_Global_7d.csv",
+  "provider": "NASA FIRMS",
+  "registered_at": "2026-11-13T19:03:21Z",
+  "row_count": 416571,
+  "satellite_codes": {
+    "N20": 416571
+  },
+  "sha256": "2b1bc0c51043756043dec29ce9b1c8783c6fffde5f5fc78c64ea2b4451de7a33",
+  "size_bytes": 34683398,
+  "versions": {
+    "2.0NRT": 416571
+  }
+}

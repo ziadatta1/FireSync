@@ -8,6 +8,7 @@ from typing import Any, Literal, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel, Field
 
 from app import firms
@@ -31,6 +32,7 @@ app = FastAPI(
     version="0.2.0",
 )
 
+app.add_middleware(GZipMiddleware, minimum_size=2048)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -41,6 +43,7 @@ app.add_middleware(
     ],
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
+    expose_headers=["Content-Disposition"],
     allow_headers=["Accept", "Content-Type"],
 )
 
@@ -418,3 +421,248 @@ def imported_observations(
         "empty_message": "This imported dataset contains no observation rows." if record_count == 0 else None,
         "observations": page,
     }
+
+
+# ---------------------------------------------------------------------------
+# Global NASA FIRMS datasets (MODIS, VIIRS NOAA-20, VIIRS NOAA-21)
+# ---------------------------------------------------------------------------
+
+from functools import lru_cache as _lru_cache  # noqa: E402
+
+from fastapi.responses import StreamingResponse  # noqa: E402
+
+from app import compare as global_compare  # noqa: E402
+from app import global_data  # noqa: E402
+
+GLOBAL_POINT_LIMIT_MAX = 25000
+POLYGON_MAX_VERTICES = 200
+
+
+def _global_sources(source: Optional[list[str]]) -> list[str]:
+    available = global_data.available_sources()
+    if not available:
+        raise HTTPException(status_code=503, detail="No global datasets are registered. Run backend/scripts/register_global.py.")
+    chosen = list(dict.fromkeys(value.lower() for value in source)) if source else available
+    unknown = sorted(set(chosen) - set(global_data.SOURCE_ORDER))
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"Unknown source: {', '.join(unknown)}")
+    missing = sorted(set(chosen) - set(available))
+    if missing:
+        raise HTTPException(status_code=404, detail=f"Source not registered: {', '.join(missing)}")
+    return [name for name in global_data.SOURCE_ORDER if name in chosen]
+
+
+def _parse_polygon(polygon: Optional[str]) -> Optional[list[tuple[float, float]]]:
+    if not polygon:
+        return None
+    try:
+        vertices = [tuple(float(part) for part in pair.split(",")) for pair in polygon.split(";") if pair.strip()]
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="polygon must be 'lat,lon;lat,lon;...'") from exc
+    if not 3 <= len(vertices) <= POLYGON_MAX_VERTICES or any(len(v) != 2 for v in vertices):
+        raise HTTPException(status_code=422, detail=f"polygon needs 3-{POLYGON_MAX_VERTICES} 'lat,lon' vertices")
+    if any(not (-90 <= lat <= 90 and -180 <= lon <= 180) for lat, lon in vertices):
+        raise HTTPException(status_code=422, detail="polygon vertices out of range")
+    return [(lat, lon) for lat, lon in vertices]
+
+
+def _selection(
+    date_from: Optional[date],
+    date_to: Optional[date],
+    south: Optional[float],
+    west: Optional[float],
+    north: Optional[float],
+    east: Optional[float],
+    polygon: Optional[str],
+    daynight: Optional[str],
+    min_confidence: Optional[str],
+    satellite: Optional[str] = None,
+) -> global_data.Selection:
+    if date_from and date_to and date_from > date_to:
+        raise HTTPException(status_code=422, detail="date_from must be on or before date_to")
+    bounds = (south, west, north, east)
+    bbox = None
+    if any(value is not None for value in bounds):
+        if any(value is None for value in bounds):
+            raise HTTPException(status_code=422, detail="Provide south, west, north, and east together")
+        if not (-90 <= south <= north <= 90):
+            raise HTTPException(status_code=422, detail="Latitude bounds must satisfy -90 <= south <= north <= 90")
+        if not (-180 <= west <= east <= 180):
+            raise HTTPException(status_code=422, detail="Longitude bounds must satisfy -180 <= west <= east <= 180 (dateline-crossing boxes are not supported)")
+        bbox = (south, west, north, east)
+    if daynight is not None and daynight not in ("D", "N"):
+        raise HTTPException(status_code=422, detail="daynight must be D or N")
+    if min_confidence is not None and min_confidence not in global_data.CONF_CLASSES:
+        raise HTTPException(status_code=422, detail="min_confidence must be low, nominal, or high")
+    if satellite is not None and satellite not in global_data.SATELLITE_NAMES:
+        raise HTTPException(status_code=422, detail="Unknown satellite code")
+    return global_data.Selection(
+        date_from=date_from.isoformat() if date_from else None,
+        date_to=date_to.isoformat() if date_to else None,
+        bbox=bbox,
+        polygon=_parse_polygon(polygon),
+        daynight=daynight,
+        min_confidence=min_confidence,
+        satellite=satellite,
+    )
+
+
+def _guard(call):
+    try:
+        return call()
+    except global_data.DataUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/global/datasets")
+def global_datasets() -> dict[str, Any]:
+    """Provenance and profile of each registered global dataset (no filesystem paths)."""
+    out = []
+    for name in global_data.available_sources():
+        meta = _guard(lambda: global_data.load(name)).metadata
+        out.append(
+            {
+                "id": name,
+                "label": global_data.SOURCE_LABELS[name],
+                "nominal_pixel_km": global_data.NOMINAL_PIXEL_KM[name],
+                **{key: meta[key] for key in (
+                    "label", "firms_source", "classification", "original_filename", "acquisition", "sha256",
+                    "size_bytes", "row_count", "columns", "acquisition_dates", "date_range", "satellite_codes",
+                    "versions", "daynight", "missing_values", "duplicate_rows", "invalid_rows", "bounds",
+                    "api_cross_checks", "notes", "registered_at",
+                ) if key in meta},
+                "product": meta["label"],
+            }
+        )
+    return {"datasets": out}
+
+
+@app.get("/api/global/grid")
+def global_grid(
+    source: Optional[list[str]] = Query(default=None),
+    cell: float = 1.0,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    south: Optional[float] = None,
+    west: Optional[float] = None,
+    north: Optional[float] = None,
+    east: Optional[float] = None,
+    daynight: Optional[str] = None,
+    min_confidence: Optional[str] = None,
+) -> dict[str, Any]:
+    if cell not in global_data.ALLOWED_CELLS:
+        raise HTTPException(status_code=422, detail=f"cell must be one of {list(global_data.ALLOWED_CELLS)}")
+    sources = _global_sources(source)
+    sel = _selection(date_from, date_to, south, west, north, east, None, daynight, min_confidence)
+    return _guard(lambda: global_data.grid(sources, sel, cell))
+
+
+@app.get("/api/global/points")
+def global_points(
+    south: float,
+    west: float,
+    north: float,
+    east: float,
+    source: Optional[list[str]] = Query(default=None),
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    daynight: Optional[str] = None,
+    min_confidence: Optional[str] = None,
+    limit: int = Query(default=10000, ge=1, le=GLOBAL_POINT_LIMIT_MAX),
+) -> dict[str, Any]:
+    """Individual detections inside a viewport. If more than `limit` match, the
+    highest-FRP detections are returned and `truncated` is true."""
+    sources = _global_sources(source)
+    sel = _selection(date_from, date_to, south, west, north, east, None, daynight, min_confidence)
+    return _guard(lambda: global_data.points(sources, sel, limit))
+
+
+@app.get("/api/global/record/{source}/{source_row}")
+def global_record(source: str, source_row: int) -> dict[str, Any]:
+    name = _global_sources([source])[0]
+    try:
+        return global_data.record(name, source_row)
+    except global_data.DataUnavailable as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/api/global/stats")
+def global_stats(
+    source: Optional[list[str]] = Query(default=None),
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    south: Optional[float] = None,
+    west: Optional[float] = None,
+    north: Optional[float] = None,
+    east: Optional[float] = None,
+    polygon: Optional[str] = None,
+    daynight: Optional[str] = None,
+    min_confidence: Optional[str] = None,
+) -> dict[str, Any]:
+    sources = _global_sources(source)
+    sel = _selection(date_from, date_to, south, west, north, east, polygon, daynight, min_confidence)
+    return _guard(lambda: global_data.stats(sources, sel))
+
+
+@_lru_cache(maxsize=64)
+def _cached_compare(a, b, sel_key, cell, window, sat_a, sat_b):
+    sel = global_data.Selection(**dict(sel_key))
+    if sel.polygon:
+        sel.polygon = [tuple(v) for v in sel.polygon]
+    return global_compare.compare(a, b, sel, cell, window, sat_a, sat_b)
+
+
+@app.get("/api/global/compare")
+def global_compare_endpoint(
+    a: str = "noaa20",
+    b: str = "noaa21",
+    cell: float = 0.1,
+    window: int = Query(default=60, ge=10, le=360),
+    satellite_a: Optional[str] = None,
+    satellite_b: Optional[str] = None,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    south: Optional[float] = None,
+    west: Optional[float] = None,
+    north: Optional[float] = None,
+    east: Optional[float] = None,
+    polygon: Optional[str] = None,
+    daynight: Optional[str] = None,
+    min_confidence: Optional[str] = None,
+) -> dict[str, Any]:
+    """Paired spatio-temporal comparison between two sensors (see docs/METHODOLOGY.md)."""
+    if cell not in global_data.ALLOWED_CELLS:
+        raise HTTPException(status_code=422, detail=f"cell must be one of {list(global_data.ALLOWED_CELLS)}")
+    source_a, source_b = _global_sources([a])[0], _global_sources([b])[0]
+    if source_a == source_b:
+        raise HTTPException(status_code=422, detail="Choose two different sources")
+    for code in (satellite_a, satellite_b):
+        if code is not None and code not in global_data.SATELLITE_NAMES:
+            raise HTTPException(status_code=422, detail="Unknown satellite code")
+    sel = _selection(date_from, date_to, south, west, north, east, polygon, daynight, min_confidence)
+    sel_key = tuple(sorted((k, tuple(map(tuple, v)) if k == "polygon" and v else v) for k, v in sel.__dict__.items()))
+    return _guard(lambda: _cached_compare(source_a, source_b, sel_key, cell, window, satellite_a, satellite_b))
+
+
+@app.get("/api/global/export.csv")
+def global_export(
+    source: Optional[list[str]] = Query(default=None),
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    south: Optional[float] = None,
+    west: Optional[float] = None,
+    north: Optional[float] = None,
+    east: Optional[float] = None,
+    polygon: Optional[str] = None,
+    daynight: Optional[str] = None,
+    min_confidence: Optional[str] = None,
+) -> StreamingResponse:
+    """Stream the matching source rows unchanged, with dataset/provenance columns."""
+    sources = _global_sources(source)
+    sel = _selection(date_from, date_to, south, west, north, east, polygon, daynight, min_confidence)
+    _guard(lambda: [global_data.load(name) for name in sources])
+    return StreamingResponse(
+        global_data.export_rows(sources, sel),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="firesync_detections.csv"'},
+    )
