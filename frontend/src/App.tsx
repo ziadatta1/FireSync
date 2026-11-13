@@ -1,115 +1,119 @@
-import { useEffect, useState } from 'react'
-import WildfireMap from './WildfireMap.tsx'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import GlobalMap from './GlobalMap.tsx'
+import AnalyticsPanel from './AnalyticsPanel.tsx'
+import ComparePanel from './ComparePanel.tsx'
+import DataPanel from './DataPanel.tsx'
+import Methodology from './Methodology.tsx'
+import { SOURCES, SOURCE_IDS, fmt, getJson, type Area, type Filters, type GlobalDataset, type SourceId } from './api.ts'
 
-type Dataset = {
-  name: string
-  file: string
-  status: string
-  row_count: number
-  columns: string[]
-  acquisition_date_range: { start: string | null; end: string | null }
-}
+type Tab = 'map' | 'compare' | 'data' | 'method'
+const TABS: { id: Tab; icon: string; label: string }[] = [
+  { id: 'map', icon: '◍', label: 'Global map & area analysis' },
+  { id: 'compare', icon: '⇄', label: 'Sensor comparison' },
+  { id: 'data', icon: '▤', label: 'Data & provenance' },
+  { id: 'method', icon: '∑', label: 'Methodology' },
+]
 
-type Summary = {
-  data_status: string
-  provenance_note: string
-  datasets: Record<string, Dataset>
-}
-
-const API = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000'
-
-function formatDateRange(dataset: Dataset) {
-  const { start, end } = dataset.acquisition_date_range
-  if (!start || !end) return 'Date range unavailable'
-  return start === end ? start : `${start} — ${end}`
+function AreaInput({ area, onArea }: { area: Area | null; onArea: (a: Area | null) => void }) {
+  const [draft, setDraft] = useState({ south: '', west: '', north: '', east: '' })
+  const [error, setError] = useState('')
+  useEffect(() => {
+    if (area?.kind === 'bbox') setDraft({ south: area.south.toFixed(2), west: area.west.toFixed(2), north: area.north.toFixed(2), east: area.east.toFixed(2) })
+  }, [area])
+  const apply = () => {
+    const v = Object.fromEntries(Object.entries(draft).map(([k, x]) => [k, Number(x)])) as Record<'south' | 'west' | 'north' | 'east', number>
+    if (Object.values(draft).some((x) => x.trim() === '') || Object.values(v).some(Number.isNaN)) return setError('Enter four numbers.')
+    if (!(v.south >= -90 && v.north <= 90 && v.south < v.north)) return setError('Need −90 ≤ south < north ≤ 90.')
+    if (!(v.west >= -180 && v.east <= 180 && v.west < v.east)) return setError('Need −180 ≤ west < east ≤ 180 (no dateline crossing).')
+    setError('')
+    onArea({ kind: 'bbox', ...v })
+  }
+  return (
+    <form className="area-input" onSubmit={(e) => { e.preventDefault(); apply() }}>
+      <span className="control-label">COORDINATES</span>
+      {(['south', 'west', 'north', 'east'] as const).map((k) => (
+        <label key={k}><span>{k.toUpperCase()}</span><input inputMode="decimal" value={draft[k]} onChange={(e) => setDraft({ ...draft, [k]: e.target.value })} placeholder={k === 'south' || k === 'north' ? 'lat' : 'lon'} /></label>
+      ))}
+      <button type="submit" className="ghost-button">Set area</button>
+      {error && <span className="input-error">{error}</span>}
+    </form>
+  )
 }
 
 function App() {
-  const [summary, setSummary] = useState<Summary | null>(null)
-  const [error, setError] = useState('')
+  const [tab, setTab] = useState<Tab>('map')
+  const [datasets, setDatasets] = useState<GlobalDataset[]>([])
+  const [catalogError, setCatalogError] = useState('')
+  const [filters, setFilters] = useState<Filters>({ sources: [...SOURCE_IDS], dateFrom: '', dateTo: '', minConfidence: '', daynight: '' })
+  const [area, setArea] = useState<Area | null>(null)
+  const [focus, setFocus] = useState<{ lat: number; lon: number; zoom: number; n: number } | null>(null)
 
   useEffect(() => {
-    fetch(`${API}/api/datasets/summary`)
-      .then((response) => {
-        if (!response.ok) throw new Error(`API returned ${response.status}`)
-        return response.json() as Promise<Summary>
-      })
-      .then(setSummary)
-      .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : 'Could not reach the API'))
+    getJson<{ datasets: GlobalDataset[] }>('/api/global/datasets')
+      .then((body) => setDatasets(body.datasets))
+      .catch((e: unknown) => setCatalogError(e instanceof Error ? e.message : 'Could not reach the API'))
   }, [])
 
-  const datasets = summary ? Object.values(summary.datasets) : []
-  const totalRows = datasets.reduce((total, dataset) => total + dataset.row_count, 0)
+  const dates = useMemo(() => [...new Set(datasets.flatMap((d) => Object.keys(d.acquisition_dates)))].sort(), [datasets])
+  const totalRows = datasets.reduce((s, d) => s + d.row_count, 0)
+  const toggle = (s: SourceId) => setFilters((f) => ({ ...f, sources: f.sources.includes(s) ? f.sources.filter((x) => x !== s) : SOURCE_IDS.filter((x) => x === s || f.sources.includes(x)) }))
+  const onFocus = useCallback((lat: number, lon: number) => { setTab('map'); setFocus({ lat, lon, zoom: 7, n: Date.now() }); window.scrollTo({ top: 0, behavior: 'smooth' }) }, [])
 
   return (
     <main className="shell">
       <aside className="rail" aria-label="Primary navigation">
         <div className="brand-mark">F<span>·</span></div>
         <div className="rail-divider" />
-        <button className="rail-button active" aria-label="Overview" title="Overview">⌂</button>
-        <button className="rail-button" aria-label="Datasets" title="Datasets">▤</button>
-        <div className="rail-bottom"><span className="pulse" />LOCAL</div>
+        {TABS.map((t) => (
+          <button key={t.id} className={`rail-button ${tab === t.id ? 'active' : ''}`} aria-label={t.label} title={t.label} onClick={() => setTab(t.id)} aria-current={tab === t.id ? 'page' : undefined}>{t.icon}</button>
+        ))}
+        <div className="rail-bottom"><span className="pulse" />FIRMS</div>
       </aside>
 
       <section className="workspace">
         <header className="topbar">
-          <div className="wordmark">FIRESYNC <span>FIELD INTELLIGENCE</span></div>
-          <div className="topbar-right"><span className="status-dot" /> FOUNDATION / LOCAL</div>
+          <div className="wordmark">FIRESYNC <span>MULTI-SATELLITE ACTIVE FIRE MONITOR</span></div>
+          <nav className="tabs" aria-label="Views">
+            {TABS.map((t) => <button key={t.id} type="button" className={tab === t.id ? 'active' : ''} onClick={() => setTab(t.id)}>{t.label}</button>)}
+          </nav>
+          <div className="topbar-right"><span className="status-dot" /> {datasets.length ? `${fmt(totalRows)} NASA FIRMS DETECTIONS · ${dates[0]} → ${dates[dates.length - 1]}` : catalogError ? 'API OFFLINE' : 'CONNECTING…'}</div>
         </header>
 
         <div className="content">
-          <div className="eyebrow"><span className="eyebrow-line" /> OBSERVATION DESK <span className="eyebrow-index">01 / OVERVIEW</span></div>
-          <section className="intro">
-            <div>
-              <h1>Fire activity<br /><em>at a glance.</em></h1>
-              <p className="lede">A read-only workspace for exploring local satellite fire observation files.</p>
+          {catalogError && <div className="error-panel">API connection unavailable: {catalogError}. Start the backend (see README) to load data.</div>}
+          {tab !== 'data' && tab !== 'method' && (
+            <div className="filter-bar">
+              {tab === 'map' && <div className="layer-toggles" aria-label="Satellite sources">
+                <span className="control-label">SOURCES</span>
+                {SOURCE_IDS.map((s) => (
+                  <label key={s} className={`layer-toggle ${filters.sources.includes(s) ? 'checked' : ''}`}>
+                    <input type="checkbox" checked={filters.sources.includes(s)} onChange={() => toggle(s)} />
+                    <i className={`shape-key ${SOURCES[s].shape}`} style={{ background: SOURCES[s].color }} />{SOURCES[s].short}
+                  </label>
+                ))}
+              </div>}
+              {tab === 'compare' && <span className="control-label">FILTERS APPLIED TO BOTH SENSORS</span>}
+              <div className="filter-fields compact">
+                <label><span>FROM (UTC)</span><select value={filters.dateFrom} onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}><option value="">{dates[0] ?? 'first'}</option>{dates.map((d) => <option key={d} value={d}>{d}</option>)}</select></label>
+                <label><span>TO (UTC)</span><select value={filters.dateTo} onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}><option value="">{dates[dates.length - 1] ?? 'last'}</option>{dates.map((d) => <option key={d} value={d}>{d}</option>)}</select></label>
+                <label><span>MIN CONFIDENCE</span><select value={filters.minConfidence} onChange={(e) => setFilters({ ...filters, minConfidence: e.target.value as Filters['minConfidence'] })}><option value="">Any</option><option value="nominal">Nominal +</option><option value="high">High</option></select></label>
+                <label><span>DAY / NIGHT</span><select value={filters.daynight} onChange={(e) => setFilters({ ...filters, daynight: e.target.value as Filters['daynight'] })}><option value="">Both</option><option value="D">Day</option><option value="N">Night</option></select></label>
+              </div>
+              {filters.dateFrom && filters.dateTo && filters.dateFrom > filters.dateTo && <span className="input-error">“From” is after “To”.</span>}
             </div>
-            <div className="intro-stamp"><span>DATA STATUS</span><strong>UNVERIFIED<br />LOCAL DATA</strong><small>Source confirmation pending</small></div>
-          </section>
+          )}
 
-          <div className="notice"><span className="notice-icon">!</span><p><strong>Provenance not confirmed.</strong> These files are not represented as authenticated NASA observations. Confirm source records before using them for scientific or operational claims.</p></div>
+          {/* The map stays mounted (hidden) on other tabs: keeps the view and avoids Leaflet teardown mid-animation. */}
+          <div hidden={tab !== 'map'}>
+            <GlobalMap filters={filters} area={area} onArea={setArea} focus={focus} visible={tab === 'map'} />
+            <AreaInput area={area} onArea={setArea} />
+            {tab === 'map' && <AnalyticsPanel filters={filters} area={area} onFocus={onFocus} />}
+          </div>
+          {tab === 'compare' && <ComparePanel filters={filters} area={area} />}
+          {tab === 'data' && <DataPanel datasets={datasets} error={catalogError} />}
+          {tab === 'method' && <Methodology />}
 
-          <section className="metrics" aria-label="Dataset summary">
-            <article className="metric-card">
-              <span className="metric-label">LOCAL RECORDS</span>
-              <strong>{summary ? totalRows.toLocaleString() : '—'}</strong>
-              <span className="metric-foot">Across {datasets.length || '—'} source files</span>
-            </article>
-            <article className="metric-card">
-              <span className="metric-label">DATASETS</span>
-              <strong>{summary ? datasets.length.toString().padStart(2, '0') : '—'}</strong>
-              <span className="metric-foot">MODIS + VIIRS local CSVs</span>
-            </article>
-            <article className="metric-card metric-card-wide">
-              <span className="metric-label">APPLICATION MODE</span>
-              <strong className="mode-value">READ ONLY <span className="mode-dot" /></strong>
-              <span className="metric-foot">No harmonization or analysis applied</span>
-            </article>
-          </section>
-
-          <section className="section-heading">
-            <div><span className="section-kicker">01—02 / CATALOG</span><h2>Local datasets</h2></div>
-            <span className="catalog-meta">LOCAL FILE SUMMARY <span className="mini-pulse" /></span>
-          </section>
-
-          {error && <div className="error-panel">API connection unavailable: {error}. Start the backend to load file summaries.</div>}
-          <section className="dataset-grid" aria-label="Local datasets">
-            {datasets.map((dataset, index) => (
-              <article className="dataset-card" key={dataset.name}>
-                <div className="dataset-top"><span className="dataset-index">0{index + 1} / SENSOR FILE</span><span className="dataset-status">UNVERIFIED LOCAL DATA</span></div>
-                <div className="dataset-title-row"><h3>{dataset.name}</h3><span className="satellite-glyph">◉</span></div>
-                <div className="dataset-file">{dataset.file}</div>
-                <div className="dataset-rule" />
-                <div className="dataset-stats"><div><span>RECORDS</span><strong>{dataset.row_count.toLocaleString()}</strong></div><div><span>ACQUISITION WINDOW</span><strong className="date-value">{formatDateRange(dataset)}</strong></div></div>
-                <div className="field-list"><span>AVAILABLE FIELDS</span><p>{dataset.columns.join(' · ')}</p></div>
-              </article>
-            ))}
-            {!summary && !error && <div className="loading-card">Connecting to local data service<span className="loading-pulse" /></div>}
-          </section>
-
-          <WildfireMap />
-
-          <footer><span>FIRESYNC / APPLICATION FOUNDATION</span><span>LOCAL FILES · READ ONLY · PROVENANCE UNVERIFIED</span></footer>
+          <footer><span>FIRESYNC · TEAM WE ARE ALIENS · NASA SPACE APPS CAIRO 2026</span><span>Data: NASA FIRMS (MODIS C6.1 NRT, VIIRS C2 NRT). Not an official NASA product.</span></footer>
         </div>
       </section>
     </main>
