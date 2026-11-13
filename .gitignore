@@ -1,0 +1,16 @@
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+backend/.venv/
+frontend/node_modules/
+frontend/dist/
+.env
+.env.*
+!.env.example
+data/imports/
+
+# Large global FIRMS snapshots and derived caches (provenance in sidecars)
+data/global/*/observations.csv
+data/cache/
+.idea/
