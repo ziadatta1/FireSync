@@ -290,7 +290,7 @@ export default function GlobalMap({ filters, area, onArea, focus, visible = true
   visible?: boolean
 }) {
   const layerRef = useRef<DetectionLayer | null>(null)
-  const [status, setStatus] = useState<ViewStatus>({ mode: 'cells', perSource: {} })
+  const [status, setStatus] = useState<ViewStatus | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selection, setSelection] = useState<{ items: DrawItem[]; mode: 'cells' | 'points' }>({ items: [], mode: 'cells' })
@@ -301,16 +301,16 @@ export default function GlobalMap({ filters, area, onArea, focus, visible = true
   const onSelect = useCallback((items: DrawItem[], mode: 'cells' | 'points') => setSelection({ items, mode }), [])
   const closeSelection = () => { setSelection({ items: [], mode: 'cells' }); layerRef.current?.setHighlight(null) }
 
-  const totalShown = Object.values(status.perSource).reduce((s, v) => s + (v?.total ?? 0), 0)
-  const truncated = Object.values(status.perSource).some((v) => v?.truncated)
+  const totalShown = Object.values(status?.perSource ?? {}).reduce((s, v) => s + (v?.total ?? 0), 0)
+  const truncated = Object.values(status?.perSource ?? {}).some((v) => v?.truncated)
 
   return (
     <div className="global-map-wrap">
       <div className="map-statusbar">
-        <span>{loading ? 'LOADING…' : status.mode === 'cells' ? `${status.cell}° CELLS · ${fmt(totalShown)} DETECTIONS IN VIEW` : `INDIVIDUAL DETECTIONS · ${fmt(totalShown)} IN VIEW`}</span>
+        <span>{loading || !status ? 'LOADING…' : status.mode === 'cells' ? `${status.cell}° CELLS · ${fmt(totalShown)} DETECTIONS IN VIEW` : `INDIVIDUAL DETECTIONS · ${fmt(totalShown)} IN VIEW`}</span>
         <span className="status-sources">
-          {SOURCE_IDS.filter((s) => status.perSource[s]).map((s) => (
-            <span key={s}><i className={`shape-key ${SOURCES[s].shape}`} style={{ background: SOURCES[s].color }} />{SOURCES[s].short} {fmt(status.perSource[s]!.total)}</span>
+          {status && SOURCE_IDS.filter((s) => status.perSource[s]).map((s) => (
+            <span key={s}><i className={`shape-key ${SOURCES[s].shape}`} style={{ background: SOURCES[s].color }} />{SOURCES[s].short} {fmt(status!.perSource[s]!.total)}</span>
           ))}
         </span>
       </div>
@@ -336,7 +336,7 @@ export default function GlobalMap({ filters, area, onArea, focus, visible = true
         {drawMode !== 'none' && <div className="draw-hint">{drawMode === 'rect' ? 'Drag to draw a box.' : 'Click to add vertices · double-click or Enter to finish · Esc to cancel.'}</div>}
         {selection.items.length > 0 && <Selection items={selection.items} mode={selection.mode} onClose={closeSelection} onZoom={(lat, lon) => setFlyTarget({ lat, lon, zoom: 8, n: Date.now() })} />}
         {!filters.sources.length && <div className="map-empty-overlay">Enable at least one satellite source.</div>}
-        {!loading && !error && filters.sources.length > 0 && totalShown === 0 && <div className="map-empty-overlay">No detections match these filters in this view. (No detection ≠ no fire: clouds, overpass timing and detection limits apply.)</div>}
+        {status && !loading && !error && filters.sources.length > 0 && totalShown === 0 && <div className="map-empty-overlay">No detections match these filters in this view. (No detection ≠ no fire: clouds, overpass timing and detection limits apply.)</div>}
         {error && <div className="map-empty-overlay error">Map data unavailable: {error}</div>}
       </div>
       <div className="map-footer">
@@ -344,7 +344,7 @@ export default function GlobalMap({ filters, area, onArea, focus, visible = true
           {SOURCE_IDS.map((s) => <span key={s}><i className={`shape-key ${SOURCES[s].shape}`} style={{ background: SOURCES[s].color }} />{SOURCES[s].label}</span>)}
         </div>
         <span className="legend-note">
-          {status.mode === 'cells'
+          {!status ? 'Loading NASA FIRMS detections…' : status.mode === 'cells'
             ? `Zoom ≤ 6: detections aggregated server-side into ${status.cell}° cells (mark size ∝ log count). Zoom ≥ ${POINT_ZOOM}: individual detections.`
             : truncated ? `More than ${fmt(POINT_LIMIT)} detections in view for a source — showing the highest-FRP ${fmt(POINT_LIMIT)}; zoom in for all.` : 'Every matching detection in view is drawn. Click one for its full source record.'}
         </span>
