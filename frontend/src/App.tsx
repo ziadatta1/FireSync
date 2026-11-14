@@ -4,12 +4,14 @@ import AnalyticsPanel from './AnalyticsPanel.tsx'
 import ComparePanel from './ComparePanel.tsx'
 import DataPanel from './DataPanel.tsx'
 import Methodology from './Methodology.tsx'
+import HistoricalPanel from './HistoricalPanel.tsx'
 import { SOURCES, SOURCE_IDS, fmt, getJson, type Area, type Filters, type GlobalDataset, type SourceId } from './api.ts'
 
-type Tab = 'map' | 'compare' | 'data' | 'method'
+type Tab = 'map' | 'compare' | 'history' | 'data' | 'method'
 const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: 'map', icon: '◍', label: 'Global map & area analysis' },
   { id: 'compare', icon: '⇄', label: 'Sensor comparison' },
+  { id: 'history', icon: '▦', label: 'Historical calendar' },
   { id: 'data', icon: '▤', label: 'Data & provenance' },
   { id: 'method', icon: '∑', label: 'Methodology' },
 ]
@@ -81,7 +83,7 @@ function App() {
 
         <div className="content">
           {catalogError && <div className="error-panel">API connection unavailable: {catalogError}. Start the backend (see README) to load data.</div>}
-          {tab !== 'data' && tab !== 'method' && (
+          {tab !== 'data' && tab !== 'method' && tab !== 'history' && (
             <div className="filter-bar">
               {tab === 'map' && <div className="layer-toggles" aria-label="Satellite sources">
                 <span className="control-label">SOURCES</span>
@@ -110,6 +112,7 @@ function App() {
             {tab === 'map' && <AnalyticsPanel filters={filters} area={area} onFocus={onFocus} />}
           </div>
           {tab === 'compare' && <ComparePanel filters={filters} area={area} />}
+          {tab === 'history' && <HistoricalPanel />}
           {tab === 'data' && <DataPanel datasets={datasets} error={catalogError} />}
           {tab === 'method' && <Methodology />}
 

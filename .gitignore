@@ -14,3 +14,5 @@ data/imports/
 data/global/*/observations.csv
 data/cache/
 .idea/
+data/archive/raw/
+data/archive/*/daily_cells.csv.gz

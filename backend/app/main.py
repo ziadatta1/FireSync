@@ -666,3 +666,62 @@ def global_export(
         media_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="firesync_detections.csv"'},
     )
+
+
+# ---------------------------------------------------------------------------
+# Historical archive (FIRMS standard processing) and year-based validation
+# ---------------------------------------------------------------------------
+
+from app import archive as archive_store  # noqa: E402
+from app import harmonize  # noqa: E402
+
+_validation_cache: dict = {}
+
+
+def _archive_signature() -> str:
+    parts = []
+    for region in archive_store.REGIONS:
+        path = archive_store.region_dir(region) / "monthly.csv"
+        manifest = archive_store.manifest_path(region)
+        for p in (path, manifest):
+            if p.is_file():
+                stat = p.stat()
+                parts.append(f"{p.name}:{region}:{stat.st_mtime_ns}:{stat.st_size}")
+    return "|".join(parts)
+
+
+def _validation() -> dict[str, Any]:
+    signature = _archive_signature()
+    if _validation_cache.get("signature") != signature:
+        _validation_cache["signature"] = signature
+        _validation_cache["value"] = harmonize.validate()
+    return _validation_cache["value"]
+
+
+@app.get("/api/archive/regions")
+def archive_regions() -> dict[str, Any]:
+    """Study regions, with what has been fetched for each (no filesystem paths)."""
+    out = []
+    for region, spec in archive_store.REGIONS.items():
+        coverage = archive_store.coverage(region)
+        out.append({
+            "id": region, **spec,
+            "available": (archive_store.region_dir(region) / "monthly.csv").is_file(),
+            "coverage": coverage,
+        })
+    return {"regions": out}
+
+
+@app.get("/api/archive/validation")
+def archive_validation() -> dict[str, Any]:
+    """Year-based validation: fit 2012-2019, test 2020-2025 (see docs/METHODOLOGY.md)."""
+    return _validation()
+
+
+@app.get("/api/archive/{region}/calendar")
+def archive_calendar(region: str) -> dict[str, Any]:
+    if region not in archive_store.REGIONS:
+        raise HTTPException(status_code=404, detail="Unknown region")
+    if not (archive_store.region_dir(region) / "monthly.csv").is_file():
+        raise HTTPException(status_code=404, detail="No archive data fetched for this region yet")
+    return harmonize.calendar(region)

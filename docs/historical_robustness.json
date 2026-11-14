@@ -1,0 +1,1795 @@
+{
+ "regions": [
+  "central_africa",
+  "nile_delta"
+ ],
+ "variants": {
+  "baseline_type0_terra_aqua": {
+   "selected_model": "M3",
+   "lambda": 0,
+   "train_months": 190,
+   "test_months": 144,
+   "models": {
+    "M0": {
+     "cv_median_abs_log10_error": 0.8631,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.8772,
+      "median_abs_error_factor": 7.537,
+      "bias_log10": -0.8772,
+      "spearman_monthly": 0.9709,
+      "annual_total_median_abs_pct_error": 77.2
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.749,
+       "median_abs_error_factor": 5.611,
+       "bias_log10": -0.749,
+       "spearman_monthly": 0.9859,
+       "annual_total_median_abs_pct_error": 77.2
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 1.0511,
+       "median_abs_error_factor": 11.249,
+       "bias_log10": -1.0511,
+       "spearman_monthly": 0.7812,
+       "annual_total_median_abs_pct_error": 90.6
+      }
+     }
+    },
+    "M1": {
+     "cv_median_abs_log10_error": 0.2558,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.272,
+      "median_abs_error_factor": 1.871,
+      "bias_log10": -0.272,
+      "spearman_monthly": 0.9709,
+      "annual_total_median_abs_pct_error": 7.1
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.1382,
+       "median_abs_error_factor": 1.375,
+       "bias_log10": -0.1382,
+       "spearman_monthly": 0.9859,
+       "annual_total_median_abs_pct_error": 6.9
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.4534,
+       "median_abs_error_factor": 2.84,
+       "bias_log10": -0.4534,
+       "spearman_monthly": 0.7812,
+       "annual_total_median_abs_pct_error": 61.5
+      }
+     }
+    },
+    "M2": {
+     "cv_median_abs_log10_error": 0.1085,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.1239,
+      "median_abs_error_factor": 1.33,
+      "bias_log10": -0.1066,
+      "spearman_monthly": 0.9706,
+      "annual_total_median_abs_pct_error": 7.1
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.1391,
+       "median_abs_error_factor": 1.377,
+       "bias_log10": -0.1391,
+       "spearman_monthly": 0.9859,
+       "annual_total_median_abs_pct_error": 7.1
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1188,
+       "median_abs_error_factor": 1.315,
+       "bias_log10": -0.0604,
+       "spearman_monthly": 0.7812,
+       "annual_total_median_abs_pct_error": 8.8
+      }
+     }
+    },
+    "M3": {
+     "cv_median_abs_log10_error": 0.0484,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.0629,
+      "median_abs_error_factor": 1.156,
+      "bias_log10": -0.0269,
+      "spearman_monthly": 0.973,
+      "annual_total_median_abs_pct_error": 5.2
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.0461,
+       "median_abs_error_factor": 1.112,
+       "bias_log10": -0.0389,
+       "spearman_monthly": 0.9848,
+       "annual_total_median_abs_pct_error": 5.2
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1108,
+       "median_abs_error_factor": 1.291,
+       "bias_log10": 0.0202,
+       "spearman_monthly": 0.7992,
+       "annual_total_median_abs_pct_error": 5.1
+      }
+     }
+    },
+    "M4": {
+     "cv_median_abs_log10_error": 0.0531,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.0569,
+      "median_abs_error_factor": 1.14,
+      "bias_log10": -0.0212,
+      "spearman_monthly": 0.9709,
+      "annual_total_median_abs_pct_error": 5.9
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.0441,
+       "median_abs_error_factor": 1.107,
+       "bias_log10": -0.041,
+       "spearman_monthly": 0.9859,
+       "annual_total_median_abs_pct_error": 6.0
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1012,
+       "median_abs_error_factor": 1.262,
+       "bias_log10": 0.0121,
+       "spearman_monthly": 0.7812,
+       "annual_total_median_abs_pct_error": 6.3
+      }
+     }
+    }
+   },
+   "single_region_runs": {
+    "central_africa": {
+     "M0": {
+      "cv_median_abs_log10_error": 0.7129,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.749,
+       "median_abs_error_factor": 5.611,
+       "bias_log10": -0.749,
+       "spearman_monthly": 0.9859,
+       "annual_total_median_abs_pct_error": 77.2
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.749,
+        "median_abs_error_factor": 5.611,
+        "bias_log10": -0.749,
+        "spearman_monthly": 0.9859,
+        "annual_total_median_abs_pct_error": 77.2
+       }
+      }
+     },
+     "M1": {
+      "cv_median_abs_log10_error": 0.1038,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1391,
+       "median_abs_error_factor": 1.377,
+       "bias_log10": -0.1391,
+       "spearman_monthly": 0.9859,
+       "annual_total_median_abs_pct_error": 7.1
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.1391,
+        "median_abs_error_factor": 1.377,
+        "bias_log10": -0.1391,
+        "spearman_monthly": 0.9859,
+        "annual_total_median_abs_pct_error": 7.1
+       }
+      }
+     },
+     "M2": {
+      "cv_median_abs_log10_error": 0.1038,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1391,
+       "median_abs_error_factor": 1.377,
+       "bias_log10": -0.1391,
+       "spearman_monthly": 0.9859,
+       "annual_total_median_abs_pct_error": 7.1
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.1391,
+        "median_abs_error_factor": 1.377,
+        "bias_log10": -0.1391,
+        "spearman_monthly": 0.9859,
+        "annual_total_median_abs_pct_error": 7.1
+       }
+      }
+     },
+     "M3": {
+      "cv_median_abs_log10_error": 0.0239,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0516,
+       "median_abs_error_factor": 1.126,
+       "bias_log10": -0.0496,
+       "spearman_monthly": 0.985,
+       "annual_total_median_abs_pct_error": 5.3
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.0516,
+        "median_abs_error_factor": 1.126,
+        "bias_log10": -0.0496,
+        "spearman_monthly": 0.985,
+        "annual_total_median_abs_pct_error": 5.3
+       }
+      }
+     },
+     "M4": {
+      "cv_median_abs_log10_error": 0.0301,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0441,
+       "median_abs_error_factor": 1.107,
+       "bias_log10": -0.041,
+       "spearman_monthly": 0.9859,
+       "annual_total_median_abs_pct_error": 6.0
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.0441,
+        "median_abs_error_factor": 1.107,
+        "bias_log10": -0.041,
+        "spearman_monthly": 0.9859,
+        "annual_total_median_abs_pct_error": 6.0
+       }
+      }
+     }
+    },
+    "nile_delta": {
+     "M0": {
+      "cv_median_abs_log10_error": 1.0351,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 1.0511,
+       "median_abs_error_factor": 11.249,
+       "bias_log10": -1.0511,
+       "spearman_monthly": 0.7812,
+       "annual_total_median_abs_pct_error": 90.6
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 1.0511,
+        "median_abs_error_factor": 11.249,
+        "bias_log10": -1.0511,
+        "spearman_monthly": 0.7812,
+        "annual_total_median_abs_pct_error": 90.6
+       }
+      }
+     },
+     "M1": {
+      "cv_median_abs_log10_error": 0.1115,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1188,
+       "median_abs_error_factor": 1.315,
+       "bias_log10": -0.0604,
+       "spearman_monthly": 0.7812,
+       "annual_total_median_abs_pct_error": 8.8
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1188,
+        "median_abs_error_factor": 1.315,
+        "bias_log10": -0.0604,
+        "spearman_monthly": 0.7812,
+        "annual_total_median_abs_pct_error": 8.8
+       }
+      }
+     },
+     "M2": {
+      "cv_median_abs_log10_error": 0.1115,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1188,
+       "median_abs_error_factor": 1.315,
+       "bias_log10": -0.0604,
+       "spearman_monthly": 0.7812,
+       "annual_total_median_abs_pct_error": 8.8
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1188,
+        "median_abs_error_factor": 1.315,
+        "bias_log10": -0.0604,
+        "spearman_monthly": 0.7812,
+        "annual_total_median_abs_pct_error": 8.8
+       }
+      }
+     },
+     "M3": {
+      "cv_median_abs_log10_error": 0.0979,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1108,
+       "median_abs_error_factor": 1.291,
+       "bias_log10": 0.0202,
+       "spearman_monthly": 0.7992,
+       "annual_total_median_abs_pct_error": 5.1
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1108,
+        "median_abs_error_factor": 1.291,
+        "bias_log10": 0.0202,
+        "spearman_monthly": 0.7992,
+        "annual_total_median_abs_pct_error": 5.1
+       }
+      }
+     },
+     "M4": {
+      "cv_median_abs_log10_error": 0.1097,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1012,
+       "median_abs_error_factor": 1.262,
+       "bias_log10": 0.0121,
+       "spearman_monthly": 0.7812,
+       "annual_total_median_abs_pct_error": 6.3
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1012,
+        "median_abs_error_factor": 1.262,
+        "bias_log10": 0.0121,
+        "spearman_monthly": 0.7812,
+        "annual_total_median_abs_pct_error": 6.3
+       }
+      }
+     }
+    }
+   }
+  },
+  "type0_aqua_only": {
+   "selected_model": "M4",
+   "lambda": 50,
+   "train_months": 190,
+   "test_months": 144,
+   "models": {
+    "M0": {
+     "cv_median_abs_log10_error": 1.0402,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 1.0647,
+      "median_abs_error_factor": 11.607,
+      "bias_log10": -1.0647,
+      "spearman_monthly": 0.9621,
+      "annual_total_median_abs_pct_error": 83.7
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.8597,
+       "median_abs_error_factor": 7.24,
+       "bias_log10": -0.8597,
+       "spearman_monthly": 0.9836,
+       "annual_total_median_abs_pct_error": 83.7
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 1.4317,
+       "median_abs_error_factor": 27.019,
+       "bias_log10": -1.4317,
+       "spearman_monthly": 0.713,
+       "annual_total_median_abs_pct_error": 95.4
+      }
+     }
+    },
+    "M1": {
+     "cv_median_abs_log10_error": 0.2655,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.2984,
+      "median_abs_error_factor": 1.988,
+      "bias_log10": -0.2984,
+      "spearman_monthly": 0.9621,
+      "annual_total_median_abs_pct_error": 2.7
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.092,
+       "median_abs_error_factor": 1.236,
+       "bias_log10": -0.083,
+       "spearman_monthly": 0.9836,
+       "annual_total_median_abs_pct_error": 2.5
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.6763,
+       "median_abs_error_factor": 4.746,
+       "bias_log10": -0.6763,
+       "spearman_monthly": 0.713,
+       "annual_total_median_abs_pct_error": 72.3
+      }
+     }
+    },
+    "M2": {
+     "cv_median_abs_log10_error": 0.1071,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.1435,
+      "median_abs_error_factor": 1.391,
+      "bias_log10": -0.1012,
+      "spearman_monthly": 0.9619,
+      "annual_total_median_abs_pct_error": 2.8
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.092,
+       "median_abs_error_factor": 1.236,
+       "bias_log10": -0.084,
+       "spearman_monthly": 0.9836,
+       "annual_total_median_abs_pct_error": 2.8
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.2125,
+       "median_abs_error_factor": 1.631,
+       "bias_log10": -0.1459,
+       "spearman_monthly": 0.713,
+       "annual_total_median_abs_pct_error": 7.9
+      }
+     }
+    },
+    "M3": {
+     "cv_median_abs_log10_error": 0.061,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.0808,
+      "median_abs_error_factor": 1.204,
+      "bias_log10": -0.0321,
+      "spearman_monthly": 0.962,
+      "annual_total_median_abs_pct_error": 1.2
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.034,
+       "median_abs_error_factor": 1.081,
+       "bias_log10": -0.0243,
+       "spearman_monthly": 0.9821,
+       "annual_total_median_abs_pct_error": 1.2
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1858,
+       "median_abs_error_factor": 1.534,
+       "bias_log10": -0.0572,
+       "spearman_monthly": 0.714,
+       "annual_total_median_abs_pct_error": 2.6
+      }
+     }
+    },
+    "M4": {
+     "cv_median_abs_log10_error": 0.0603,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.0646,
+      "median_abs_error_factor": 1.16,
+      "bias_log10": -0.0118,
+      "spearman_monthly": 0.9621,
+      "annual_total_median_abs_pct_error": 2.6
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.0342,
+       "median_abs_error_factor": 1.082,
+       "bias_log10": -0.0183,
+       "spearman_monthly": 0.9836,
+       "annual_total_median_abs_pct_error": 2.6
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1029,
+       "median_abs_error_factor": 1.267,
+       "bias_log10": 0.0335,
+       "spearman_monthly": 0.713,
+       "annual_total_median_abs_pct_error": 10.3
+      }
+     }
+    }
+   },
+   "single_region_runs": {
+    "central_africa": {
+     "M0": {
+      "cv_median_abs_log10_error": 0.8334,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.8597,
+       "median_abs_error_factor": 7.24,
+       "bias_log10": -0.8597,
+       "spearman_monthly": 0.9836,
+       "annual_total_median_abs_pct_error": 83.7
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.8597,
+        "median_abs_error_factor": 7.24,
+        "bias_log10": -0.8597,
+        "spearman_monthly": 0.9836,
+        "annual_total_median_abs_pct_error": 83.7
+       }
+      }
+     },
+     "M1": {
+      "cv_median_abs_log10_error": 0.0558,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.092,
+       "median_abs_error_factor": 1.236,
+       "bias_log10": -0.084,
+       "spearman_monthly": 0.9836,
+       "annual_total_median_abs_pct_error": 2.8
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.092,
+        "median_abs_error_factor": 1.236,
+        "bias_log10": -0.084,
+        "spearman_monthly": 0.9836,
+        "annual_total_median_abs_pct_error": 2.8
+       }
+      }
+     },
+     "M2": {
+      "cv_median_abs_log10_error": 0.0558,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.092,
+       "median_abs_error_factor": 1.236,
+       "bias_log10": -0.084,
+       "spearman_monthly": 0.9836,
+       "annual_total_median_abs_pct_error": 2.8
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.092,
+        "median_abs_error_factor": 1.236,
+        "bias_log10": -0.084,
+        "spearman_monthly": 0.9836,
+        "annual_total_median_abs_pct_error": 2.8
+       }
+      }
+     },
+     "M3": {
+      "cv_median_abs_log10_error": 0.0255,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0385,
+       "median_abs_error_factor": 1.093,
+       "bias_log10": -0.0334,
+       "spearman_monthly": 0.9825,
+       "annual_total_median_abs_pct_error": 1.3
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.0385,
+        "median_abs_error_factor": 1.093,
+        "bias_log10": -0.0334,
+        "spearman_monthly": 0.9825,
+        "annual_total_median_abs_pct_error": 1.3
+       }
+      }
+     },
+     "M4": {
+      "cv_median_abs_log10_error": 0.029,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0342,
+       "median_abs_error_factor": 1.082,
+       "bias_log10": -0.0183,
+       "spearman_monthly": 0.9836,
+       "annual_total_median_abs_pct_error": 2.6
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.0342,
+        "median_abs_error_factor": 1.082,
+        "bias_log10": -0.0183,
+        "spearman_monthly": 0.9836,
+        "annual_total_median_abs_pct_error": 2.6
+       }
+      }
+     }
+    },
+    "nile_delta": {
+     "M0": {
+      "cv_median_abs_log10_error": 1.4135,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 1.4317,
+       "median_abs_error_factor": 27.019,
+       "bias_log10": -1.4317,
+       "spearman_monthly": 0.713,
+       "annual_total_median_abs_pct_error": 95.4
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 1.4317,
+        "median_abs_error_factor": 27.019,
+        "bias_log10": -1.4317,
+        "spearman_monthly": 0.713,
+        "annual_total_median_abs_pct_error": 95.4
+       }
+      }
+     },
+     "M1": {
+      "cv_median_abs_log10_error": 0.2137,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.2125,
+       "median_abs_error_factor": 1.631,
+       "bias_log10": -0.1459,
+       "spearman_monthly": 0.713,
+       "annual_total_median_abs_pct_error": 7.9
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.2125,
+        "median_abs_error_factor": 1.631,
+        "bias_log10": -0.1459,
+        "spearman_monthly": 0.713,
+        "annual_total_median_abs_pct_error": 7.9
+       }
+      }
+     },
+     "M2": {
+      "cv_median_abs_log10_error": 0.2137,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.2125,
+       "median_abs_error_factor": 1.631,
+       "bias_log10": -0.1459,
+       "spearman_monthly": 0.713,
+       "annual_total_median_abs_pct_error": 7.9
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.2125,
+        "median_abs_error_factor": 1.631,
+        "bias_log10": -0.1459,
+        "spearman_monthly": 0.713,
+        "annual_total_median_abs_pct_error": 7.9
+       }
+      }
+     },
+     "M3": {
+      "cv_median_abs_log10_error": 0.1404,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1916,
+       "median_abs_error_factor": 1.555,
+       "bias_log10": -0.0041,
+       "spearman_monthly": 0.6932,
+       "annual_total_median_abs_pct_error": 13.6
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1916,
+        "median_abs_error_factor": 1.555,
+        "bias_log10": -0.0041,
+        "spearman_monthly": 0.6932,
+        "annual_total_median_abs_pct_error": 13.6
+       }
+      }
+     },
+     "M4": {
+      "cv_median_abs_log10_error": 0.1291,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1029,
+       "median_abs_error_factor": 1.267,
+       "bias_log10": 0.0335,
+       "spearman_monthly": 0.713,
+       "annual_total_median_abs_pct_error": 10.3
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1029,
+        "median_abs_error_factor": 1.267,
+        "bias_log10": 0.0335,
+        "spearman_monthly": 0.713,
+        "annual_total_median_abs_pct_error": 10.3
+       }
+      }
+     }
+    }
+   }
+  },
+  "type0_terra_only": {
+   "selected_model": "M3",
+   "lambda": 10,
+   "train_months": 190,
+   "test_months": 144,
+   "models": {
+    "M0": {
+     "cv_median_abs_log10_error": 1.3215,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 1.3493,
+      "median_abs_error_factor": 22.35,
+      "bias_log10": -1.3493,
+      "spearman_monthly": 0.9614,
+      "annual_total_median_abs_pct_error": 93.6
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 1.4163,
+       "median_abs_error_factor": 26.08,
+       "bias_log10": -1.4163,
+       "spearman_monthly": 0.9793,
+       "annual_total_median_abs_pct_error": 93.6
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 1.2857,
+       "median_abs_error_factor": 19.308,
+       "bias_log10": -1.2857,
+       "spearman_monthly": 0.7346,
+       "annual_total_median_abs_pct_error": 95.0
+      }
+     }
+    },
+    "M1": {
+     "cv_median_abs_log10_error": 0.2279,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.2643,
+      "median_abs_error_factor": 1.838,
+      "bias_log10": -0.2611,
+      "spearman_monthly": 0.9614,
+      "annual_total_median_abs_pct_error": 18.0
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.3076,
+       "median_abs_error_factor": 2.031,
+       "bias_log10": -0.3076,
+       "spearman_monthly": 0.9793,
+       "annual_total_median_abs_pct_error": 17.9
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.2412,
+       "median_abs_error_factor": 1.742,
+       "bias_log10": -0.2325,
+       "spearman_monthly": 0.7346,
+       "annual_total_median_abs_pct_error": 35.3
+      }
+     }
+    },
+    "M2": {
+     "cv_median_abs_log10_error": 0.1683,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.2124,
+      "median_abs_error_factor": 1.631,
+      "bias_log10": -0.1591,
+      "spearman_monthly": 0.9556,
+      "annual_total_median_abs_pct_error": 18.0
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.3081,
+       "median_abs_error_factor": 2.033,
+       "bias_log10": -0.3081,
+       "spearman_monthly": 0.9793,
+       "annual_total_median_abs_pct_error": 18.0
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1268,
+       "median_abs_error_factor": 1.339,
+       "bias_log10": -0.0361,
+       "spearman_monthly": 0.7346,
+       "annual_total_median_abs_pct_error": 7.7
+      }
+     }
+    },
+    "M3": {
+     "cv_median_abs_log10_error": 0.0767,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.0946,
+      "median_abs_error_factor": 1.243,
+      "bias_log10": -0.0455,
+      "spearman_monthly": 0.9679,
+      "annual_total_median_abs_pct_error": 14.8
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.0864,
+       "median_abs_error_factor": 1.22,
+       "bias_log10": -0.0724,
+       "spearman_monthly": 0.971,
+       "annual_total_median_abs_pct_error": 14.9
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.0995,
+       "median_abs_error_factor": 1.257,
+       "bias_log10": 0.0056,
+       "spearman_monthly": 0.7727,
+       "annual_total_median_abs_pct_error": 8.4
+      }
+     }
+    },
+    "M4": {
+     "cv_median_abs_log10_error": 0.0921,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.1047,
+      "median_abs_error_factor": 1.273,
+      "bias_log10": -0.0237,
+      "spearman_monthly": 0.9643,
+      "annual_total_median_abs_pct_error": 15.9
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.0865,
+       "median_abs_error_factor": 1.22,
+       "bias_log10": -0.0496,
+       "spearman_monthly": 0.9793,
+       "annual_total_median_abs_pct_error": 15.9
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1071,
+       "median_abs_error_factor": 1.28,
+       "bias_log10": 0.021,
+       "spearman_monthly": 0.7346,
+       "annual_total_median_abs_pct_error": 5.7
+      }
+     }
+    }
+   },
+   "single_region_runs": {
+    "central_africa": {
+     "M0": {
+      "cv_median_abs_log10_error": 1.3295,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 1.4163,
+       "median_abs_error_factor": 26.08,
+       "bias_log10": -1.4163,
+       "spearman_monthly": 0.9793,
+       "annual_total_median_abs_pct_error": 93.6
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 1.4163,
+        "median_abs_error_factor": 26.08,
+        "bias_log10": -1.4163,
+        "spearman_monthly": 0.9793,
+        "annual_total_median_abs_pct_error": 93.6
+       }
+      }
+     },
+     "M1": {
+      "cv_median_abs_log10_error": 0.2262,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.3081,
+       "median_abs_error_factor": 2.033,
+       "bias_log10": -0.3081,
+       "spearman_monthly": 0.9793,
+       "annual_total_median_abs_pct_error": 18.0
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.3081,
+        "median_abs_error_factor": 2.033,
+        "bias_log10": -0.3081,
+        "spearman_monthly": 0.9793,
+        "annual_total_median_abs_pct_error": 18.0
+       }
+      }
+     },
+     "M2": {
+      "cv_median_abs_log10_error": 0.2262,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.3081,
+       "median_abs_error_factor": 2.033,
+       "bias_log10": -0.3081,
+       "spearman_monthly": 0.9793,
+       "annual_total_median_abs_pct_error": 18.0
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.3081,
+        "median_abs_error_factor": 2.033,
+        "bias_log10": -0.3081,
+        "spearman_monthly": 0.9793,
+        "annual_total_median_abs_pct_error": 18.0
+       }
+      }
+     },
+     "M3": {
+      "cv_median_abs_log10_error": 0.041,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0864,
+       "median_abs_error_factor": 1.22,
+       "bias_log10": -0.0724,
+       "spearman_monthly": 0.971,
+       "annual_total_median_abs_pct_error": 14.9
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.0864,
+        "median_abs_error_factor": 1.22,
+        "bias_log10": -0.0724,
+        "spearman_monthly": 0.971,
+        "annual_total_median_abs_pct_error": 14.9
+       }
+      }
+     },
+     "M4": {
+      "cv_median_abs_log10_error": 0.072,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0865,
+       "median_abs_error_factor": 1.22,
+       "bias_log10": -0.0496,
+       "spearman_monthly": 0.9793,
+       "annual_total_median_abs_pct_error": 15.9
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.0865,
+        "median_abs_error_factor": 1.22,
+        "bias_log10": -0.0496,
+        "spearman_monthly": 0.9793,
+        "annual_total_median_abs_pct_error": 15.9
+       }
+      }
+     }
+    },
+    "nile_delta": {
+     "M0": {
+      "cv_median_abs_log10_error": 1.316,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 1.2857,
+       "median_abs_error_factor": 19.308,
+       "bias_log10": -1.2857,
+       "spearman_monthly": 0.7346,
+       "annual_total_median_abs_pct_error": 95.0
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 1.2857,
+        "median_abs_error_factor": 19.308,
+        "bias_log10": -1.2857,
+        "spearman_monthly": 0.7346,
+        "annual_total_median_abs_pct_error": 95.0
+       }
+      }
+     },
+     "M1": {
+      "cv_median_abs_log10_error": 0.1434,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1268,
+       "median_abs_error_factor": 1.339,
+       "bias_log10": -0.0361,
+       "spearman_monthly": 0.7346,
+       "annual_total_median_abs_pct_error": 7.7
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1268,
+        "median_abs_error_factor": 1.339,
+        "bias_log10": -0.0361,
+        "spearman_monthly": 0.7346,
+        "annual_total_median_abs_pct_error": 7.7
+       }
+      }
+     },
+     "M2": {
+      "cv_median_abs_log10_error": 0.1434,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1268,
+       "median_abs_error_factor": 1.339,
+       "bias_log10": -0.0361,
+       "spearman_monthly": 0.7346,
+       "annual_total_median_abs_pct_error": 7.7
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1268,
+        "median_abs_error_factor": 1.339,
+        "bias_log10": -0.0361,
+        "spearman_monthly": 0.7346,
+        "annual_total_median_abs_pct_error": 7.7
+       }
+      }
+     },
+     "M3": {
+      "cv_median_abs_log10_error": 0.1247,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1133,
+       "median_abs_error_factor": 1.298,
+       "bias_log10": -0.0095,
+       "spearman_monthly": 0.7551,
+       "annual_total_median_abs_pct_error": 8.0
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1133,
+        "median_abs_error_factor": 1.298,
+        "bias_log10": -0.0095,
+        "spearman_monthly": 0.7551,
+        "annual_total_median_abs_pct_error": 8.0
+       }
+      }
+     },
+     "M4": {
+      "cv_median_abs_log10_error": 0.1203,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1071,
+       "median_abs_error_factor": 1.28,
+       "bias_log10": 0.021,
+       "spearman_monthly": 0.7346,
+       "annual_total_median_abs_pct_error": 5.7
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1071,
+        "median_abs_error_factor": 1.28,
+        "bias_log10": 0.021,
+        "spearman_monthly": 0.7346,
+        "annual_total_median_abs_pct_error": 5.7
+       }
+      }
+     }
+    }
+   }
+  },
+  "all_types_terra_aqua": {
+   "selected_model": "M4",
+   "lambda": 50,
+   "train_months": 190,
+   "test_months": 144,
+   "models": {
+    "M0": {
+     "cv_median_abs_log10_error": 0.9581,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 1.0182,
+      "median_abs_error_factor": 10.428,
+      "bias_log10": -1.0182,
+      "spearman_monthly": 0.9634,
+      "annual_total_median_abs_pct_error": 77.4
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.7511,
+       "median_abs_error_factor": 5.637,
+       "bias_log10": -0.7511,
+       "spearman_monthly": 0.9857,
+       "annual_total_median_abs_pct_error": 77.2
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 1.3841,
+       "median_abs_error_factor": 24.216,
+       "bias_log10": -1.3841,
+       "spearman_monthly": 0.7217,
+       "annual_total_median_abs_pct_error": 95.4
+      }
+     }
+    },
+    "M1": {
+     "cv_median_abs_log10_error": 0.3472,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.4086,
+      "median_abs_error_factor": 2.562,
+      "bias_log10": -0.4086,
+      "spearman_monthly": 0.9634,
+      "annual_total_median_abs_pct_error": 7.0
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.1377,
+       "median_abs_error_factor": 1.373,
+       "bias_log10": -0.1377,
+       "spearman_monthly": 0.9857,
+       "annual_total_median_abs_pct_error": 6.5
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.7781,
+       "median_abs_error_factor": 5.999,
+       "bias_log10": -0.7781,
+       "spearman_monthly": 0.7217,
+       "annual_total_median_abs_pct_error": 81.1
+      }
+     }
+    },
+    "M2": {
+     "cv_median_abs_log10_error": 0.1602,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.1473,
+      "median_abs_error_factor": 1.404,
+      "bias_log10": -0.1229,
+      "spearman_monthly": 0.9602,
+      "annual_total_median_abs_pct_error": 6.9
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.1404,
+       "median_abs_error_factor": 1.382,
+       "bias_log10": -0.1404,
+       "spearman_monthly": 0.9857,
+       "annual_total_median_abs_pct_error": 7.1
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1542,
+       "median_abs_error_factor": 1.426,
+       "bias_log10": -0.0962,
+       "spearman_monthly": 0.7217,
+       "annual_total_median_abs_pct_error": 12.3
+      }
+     }
+    },
+    "M3": {
+     "cv_median_abs_log10_error": 0.0514,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.067,
+      "median_abs_error_factor": 1.167,
+      "bias_log10": -0.0231,
+      "spearman_monthly": 0.9419,
+      "annual_total_median_abs_pct_error": 5.0
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.0425,
+       "median_abs_error_factor": 1.103,
+       "bias_log10": -0.0364,
+       "spearman_monthly": 0.9848,
+       "annual_total_median_abs_pct_error": 5.2
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.1252,
+       "median_abs_error_factor": 1.334,
+       "bias_log10": 0.0229,
+       "spearman_monthly": 0.5512,
+       "annual_total_median_abs_pct_error": 6.7
+      }
+     }
+    },
+    "M4": {
+     "cv_median_abs_log10_error": 0.042,
+     "test": {
+      "months": 144,
+      "median_abs_log10_error": 0.0601,
+      "median_abs_error_factor": 1.148,
+      "bias_log10": 0.0119,
+      "spearman_monthly": 0.9634,
+      "annual_total_median_abs_pct_error": 5.8
+     },
+     "test_by_region": {
+      "central_africa": {
+       "months": 72,
+       "median_abs_log10_error": 0.0442,
+       "median_abs_error_factor": 1.107,
+       "bias_log10": -0.0373,
+       "spearman_monthly": 0.9857,
+       "annual_total_median_abs_pct_error": 6.0
+      },
+      "nile_delta": {
+       "months": 72,
+       "median_abs_log10_error": 0.0832,
+       "median_abs_error_factor": 1.211,
+       "bias_log10": 0.082,
+       "spearman_monthly": 0.7217,
+       "annual_total_median_abs_pct_error": 19.1
+      }
+     }
+    }
+   },
+   "single_region_runs": {
+    "central_africa": {
+     "M0": {
+      "cv_median_abs_log10_error": 0.7163,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.7511,
+       "median_abs_error_factor": 5.637,
+       "bias_log10": -0.7511,
+       "spearman_monthly": 0.9857,
+       "annual_total_median_abs_pct_error": 77.2
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.7511,
+        "median_abs_error_factor": 5.637,
+        "bias_log10": -0.7511,
+        "spearman_monthly": 0.9857,
+        "annual_total_median_abs_pct_error": 77.2
+       }
+      }
+     },
+     "M1": {
+      "cv_median_abs_log10_error": 0.1045,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1404,
+       "median_abs_error_factor": 1.382,
+       "bias_log10": -0.1404,
+       "spearman_monthly": 0.9857,
+       "annual_total_median_abs_pct_error": 7.1
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.1404,
+        "median_abs_error_factor": 1.382,
+        "bias_log10": -0.1404,
+        "spearman_monthly": 0.9857,
+        "annual_total_median_abs_pct_error": 7.1
+       }
+      }
+     },
+     "M2": {
+      "cv_median_abs_log10_error": 0.1045,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1404,
+       "median_abs_error_factor": 1.382,
+       "bias_log10": -0.1404,
+       "spearman_monthly": 0.9857,
+       "annual_total_median_abs_pct_error": 7.1
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.1404,
+        "median_abs_error_factor": 1.382,
+        "bias_log10": -0.1404,
+        "spearman_monthly": 0.9857,
+        "annual_total_median_abs_pct_error": 7.1
+       }
+      }
+     },
+     "M3": {
+      "cv_median_abs_log10_error": 0.0235,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0498,
+       "median_abs_error_factor": 1.121,
+       "bias_log10": -0.0439,
+       "spearman_monthly": 0.9849,
+       "annual_total_median_abs_pct_error": 5.2
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.0498,
+        "median_abs_error_factor": 1.121,
+        "bias_log10": -0.0439,
+        "spearman_monthly": 0.9849,
+        "annual_total_median_abs_pct_error": 5.2
+       }
+      }
+     },
+     "M4": {
+      "cv_median_abs_log10_error": 0.0303,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0442,
+       "median_abs_error_factor": 1.107,
+       "bias_log10": -0.0373,
+       "spearman_monthly": 0.9857,
+       "annual_total_median_abs_pct_error": 6.0
+      },
+      "test_by_region": {
+       "central_africa": {
+        "months": 72,
+        "median_abs_log10_error": 0.0442,
+        "median_abs_error_factor": 1.107,
+        "bias_log10": -0.0373,
+        "spearman_monthly": 0.9857,
+        "annual_total_median_abs_pct_error": 6.0
+       }
+      }
+     }
+    },
+    "nile_delta": {
+     "M0": {
+      "cv_median_abs_log10_error": 1.4672,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 1.3841,
+       "median_abs_error_factor": 24.216,
+       "bias_log10": -1.3841,
+       "spearman_monthly": 0.7217,
+       "annual_total_median_abs_pct_error": 95.4
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 1.3841,
+        "median_abs_error_factor": 24.216,
+        "bias_log10": -1.3841,
+        "spearman_monthly": 0.7217,
+        "annual_total_median_abs_pct_error": 95.4
+       }
+      }
+     },
+     "M1": {
+      "cv_median_abs_log10_error": 0.225,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1542,
+       "median_abs_error_factor": 1.426,
+       "bias_log10": -0.0962,
+       "spearman_monthly": 0.7217,
+       "annual_total_median_abs_pct_error": 12.3
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1542,
+        "median_abs_error_factor": 1.426,
+        "bias_log10": -0.0962,
+        "spearman_monthly": 0.7217,
+        "annual_total_median_abs_pct_error": 12.3
+       }
+      }
+     },
+     "M2": {
+      "cv_median_abs_log10_error": 0.225,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1542,
+       "median_abs_error_factor": 1.426,
+       "bias_log10": -0.0962,
+       "spearman_monthly": 0.7217,
+       "annual_total_median_abs_pct_error": 12.3
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1542,
+        "median_abs_error_factor": 1.426,
+        "bias_log10": -0.0962,
+        "spearman_monthly": 0.7217,
+        "annual_total_median_abs_pct_error": 12.3
+       }
+      }
+     },
+     "M3": {
+      "cv_median_abs_log10_error": 0.0886,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.1343,
+       "median_abs_error_factor": 1.362,
+       "bias_log10": 0.0432,
+       "spearman_monthly": 0.4935,
+       "annual_total_median_abs_pct_error": 12.7
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.1343,
+        "median_abs_error_factor": 1.362,
+        "bias_log10": 0.0432,
+        "spearman_monthly": 0.4935,
+        "annual_total_median_abs_pct_error": 12.7
+       }
+      }
+     },
+     "M4": {
+      "cv_median_abs_log10_error": 0.0602,
+      "test": {
+       "months": 72,
+       "median_abs_log10_error": 0.0832,
+       "median_abs_error_factor": 1.211,
+       "bias_log10": 0.082,
+       "spearman_monthly": 0.7217,
+       "annual_total_median_abs_pct_error": 19.1
+      },
+      "test_by_region": {
+       "nile_delta": {
+        "months": 72,
+        "median_abs_log10_error": 0.0832,
+        "median_abs_error_factor": 1.211,
+        "bias_log10": 0.082,
+        "spearman_monthly": 0.7217,
+        "annual_total_median_abs_pct_error": 19.1
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "per_region": {
+  "central_africa": {
+   "complete_months": 167,
+   "incomplete_months": 0,
+   "test_months_with_viirs_below_10": 0,
+   "test_months": 72,
+   "type0_share_by_source": {
+    "MODIS_SP": 0.9995,
+    "VIIRS_SNPP_SP": 0.9982
+   },
+   "yearly_ratios": [
+    {
+     "year": 2012,
+     "viirs_over_modis": 4.101,
+     "viirs_over_aqua": 5.989,
+     "viirs_over_terra": 13.008,
+     "aqua_share_of_modis": 0.685
+    },
+    {
+     "year": 2013,
+     "viirs_over_modis": 4.175,
+     "viirs_over_aqua": 6.16,
+     "viirs_over_terra": 12.961,
+     "aqua_share_of_modis": 0.678
+    },
+    {
+     "year": 2014,
+     "viirs_over_modis": 4.087,
+     "viirs_over_aqua": 5.984,
+     "viirs_over_terra": 12.892,
+     "aqua_share_of_modis": 0.683
+    },
+    {
+     "year": 2015,
+     "viirs_over_modis": 3.94,
+     "viirs_over_aqua": 5.825,
+     "viirs_over_terra": 12.174,
+     "aqua_share_of_modis": 0.676
+    },
+    {
+     "year": 2016,
+     "viirs_over_modis": 4.126,
+     "viirs_over_aqua": 6.046,
+     "viirs_over_terra": 12.996,
+     "aqua_share_of_modis": 0.682
+    },
+    {
+     "year": 2017,
+     "viirs_over_modis": 4.003,
+     "viirs_over_aqua": 5.798,
+     "viirs_over_terra": 12.932,
+     "aqua_share_of_modis": 0.69
+    },
+    {
+     "year": 2018,
+     "viirs_over_modis": 4.013,
+     "viirs_over_aqua": 5.998,
+     "viirs_over_terra": 12.124,
+     "aqua_share_of_modis": 0.669
+    },
+    {
+     "year": 2019,
+     "viirs_over_modis": 4.222,
+     "viirs_over_aqua": 6.035,
+     "viirs_over_terra": 14.048,
+     "aqua_share_of_modis": 0.699
+    },
+    {
+     "year": 2020,
+     "viirs_over_modis": 4.152,
+     "viirs_over_aqua": 6.004,
+     "viirs_over_terra": 13.459,
+     "aqua_share_of_modis": 0.692
+    },
+    {
+     "year": 2021,
+     "viirs_over_modis": 4.265,
+     "viirs_over_aqua": 6.126,
+     "viirs_over_terra": 14.041,
+     "aqua_share_of_modis": 0.696
+    },
+    {
+     "year": 2022,
+     "viirs_over_modis": 4.303,
+     "viirs_over_aqua": 6.031,
+     "viirs_over_terra": 15.017,
+     "aqua_share_of_modis": 0.713
+    },
+    {
+     "year": 2023,
+     "viirs_over_modis": 4.476,
+     "viirs_over_aqua": 6.159,
+     "viirs_over_terra": 16.379,
+     "aqua_share_of_modis": 0.727
+    },
+    {
+     "year": 2024,
+     "viirs_over_modis": 4.623,
+     "viirs_over_aqua": 6.15,
+     "viirs_over_terra": 18.622,
+     "aqua_share_of_modis": 0.752
+    },
+    {
+     "year": 2025,
+     "viirs_over_modis": 5.279,
+     "viirs_over_aqua": 6.927,
+     "viirs_over_terra": 22.196,
+     "aqua_share_of_modis": 0.762
+    }
+   ],
+   "modis_versions_first_month": {
+    "2012-01": {
+     "6.03": 51448
+    }
+   },
+   "modis_version_months_changed": {
+    "2023-01": {
+     "61.03": 120134
+    },
+    "2023-02": {
+     "61.03": 85978
+    },
+    "2023-03": {
+     "61.03": 20907
+    },
+    "2023-04": {
+     "61.03": 6341
+    },
+    "2023-05": {
+     "61.03": 3556
+    },
+    "2023-06": {
+     "61.03": 515
+    }
+   },
+   "modis_versions_last_month": {
+    "2025-12": {
+     "61.03": 67498
+    }
+   },
+   "possible_outages": {
+    "rule": "VIIRS 0 while MODIS >= 1724, or MODIS 0 while VIIRS >= 8134 (75th percentile of nonzero days)",
+    "viirs_zero_modis_active_days": 0,
+    "viirs_zero_examples": [],
+    "modis_zero_viirs_active_days": 0,
+    "modis_zero_examples": []
+   }
+  },
+  "nile_delta": {
+   "complete_months": 167,
+   "incomplete_months": 0,
+   "test_months_with_viirs_below_10": 0,
+   "test_months": 72,
+   "type0_share_by_source": {
+    "MODIS_SP": 0.7991,
+    "VIIRS_SNPP_SP": 0.4117
+   },
+   "yearly_ratios": [
+    {
+     "year": 2012,
+     "viirs_over_modis": 9.304,
+     "viirs_over_aqua": 17.595,
+     "viirs_over_terra": 19.744,
+     "aqua_share_of_modis": 0.529
+    },
+    {
+     "year": 2013,
+     "viirs_over_modis": 7.896,
+     "viirs_over_aqua": 14.143,
+     "viirs_over_terra": 17.879,
+     "aqua_share_of_modis": 0.558
+    },
+    {
+     "year": 2014,
+     "viirs_over_modis": 8.907,
+     "viirs_over_aqua": 17.861,
+     "viirs_over_terra": 17.768,
+     "aqua_share_of_modis": 0.499
+    },
+    {
+     "year": 2015,
+     "viirs_over_modis": 11.037,
+     "viirs_over_aqua": 27.026,
+     "viirs_over_terra": 18.655,
+     "aqua_share_of_modis": 0.408
+    },
+    {
+     "year": 2016,
+     "viirs_over_modis": 9.901,
+     "viirs_over_aqua": 18.444,
+     "viirs_over_terra": 21.376,
+     "aqua_share_of_modis": 0.537
+    },
+    {
+     "year": 2017,
+     "viirs_over_modis": 11.559,
+     "viirs_over_aqua": 24.886,
+     "viirs_over_terra": 21.585,
+     "aqua_share_of_modis": 0.464
+    },
+    {
+     "year": 2018,
+     "viirs_over_modis": 18.45,
+     "viirs_over_aqua": 49.436,
+     "viirs_over_terra": 29.435,
+     "aqua_share_of_modis": 0.373
+    },
+    {
+     "year": 2019,
+     "viirs_over_modis": 12.289,
+     "viirs_over_aqua": 25.177,
+     "viirs_over_terra": 24.006,
+     "aqua_share_of_modis": 0.488
+    },
+    {
+     "year": 2020,
+     "viirs_over_modis": 10.403,
+     "viirs_over_aqua": 22.54,
+     "viirs_over_terra": 19.32,
+     "aqua_share_of_modis": 0.462
+    },
+    {
+     "year": 2021,
+     "viirs_over_modis": 11.515,
+     "viirs_over_aqua": 27.527,
+     "viirs_over_terra": 19.796,
+     "aqua_share_of_modis": 0.418
+    },
+    {
+     "year": 2022,
+     "viirs_over_modis": 12.099,
+     "viirs_over_aqua": 21.483,
+     "viirs_over_terra": 27.698,
+     "aqua_share_of_modis": 0.563
+    },
+    {
+     "year": 2023,
+     "viirs_over_modis": 8.674,
+     "viirs_over_aqua": 17.275,
+     "viirs_over_terra": 17.421,
+     "aqua_share_of_modis": 0.502
+    },
+    {
+     "year": 2024,
+     "viirs_over_modis": 10.823,
+     "viirs_over_aqua": 20.73,
+     "viirs_over_terra": 22.647,
+     "aqua_share_of_modis": 0.522
+    },
+    {
+     "year": 2025,
+     "viirs_over_modis": 10.418,
+     "viirs_over_aqua": 21.769,
+     "viirs_over_terra": 19.979,
+     "aqua_share_of_modis": 0.479
+    }
+   ],
+   "modis_versions_first_month": {
+    "2012-01": {
+     "6.03": 9
+    }
+   },
+   "modis_version_months_changed": {
+    "2023-01": {
+     "61.03": 12
+    },
+    "2023-02": {
+     "61.03": 7
+    },
+    "2023-03": {
+     "61.03": 13
+    },
+    "2023-04": {
+     "61.03": 35
+    },
+    "2023-05": {
+     "61.03": 115
+    },
+    "2023-06": {
+     "61.03": 71
+    }
+   },
+   "modis_versions_last_month": {
+    "2025-12": {
+     "61.03": 24
+    }
+   },
+   "possible_outages": {
+    "rule": "VIIRS 0 while MODIS >= 5, or MODIS 0 while VIIRS >= 20 (75th percentile of nonzero days)",
+    "viirs_zero_modis_active_days": 1,
+    "viirs_zero_examples": [
+     "2024-06-01"
+    ],
+    "modis_zero_viirs_active_days": 221,
+    "modis_zero_examples": [
+     "2012-06-04",
+     "2012-06-09",
+     "2012-08-17",
+     "2012-08-18",
+     "2012-08-26",
+     "2012-09-02",
+     "2012-09-04",
+     "2012-09-05",
+     "2012-09-11",
+     "2012-09-12",
+     "2012-09-21",
+     "2012-09-30"
+    ]
+   }
+  }
+ }
+}

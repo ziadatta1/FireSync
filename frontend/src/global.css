@@ -166,3 +166,18 @@
   .tabs button { padding: 6px 8px; font-size: 12px; }
 }
 .calibration-card .verdict { color: var(--ink); }
+.heatmap { max-width: 760px; }
+.heatmap .cell-hover { stroke: #f2f5ef; stroke-width: 1.5; }
+.split-line { stroke: #c5ee79; stroke-width: 1.5; stroke-dasharray: 4 3; }
+.split-label { fill: #c5ee79; font: 10px 'DM Mono', monospace; letter-spacing: .08em; }
+.split-label.train { fill: #86938b; }
+.series-toggle { margin: 4px 0 10px; flex-wrap: wrap; }
+.series-toggle .layer-toggle { cursor: pointer; }
+.chart .line { fill: none; stroke-width: 2; }
+.chart .test-band { fill: rgba(197, 238, 121, .05); }
+.chart .crosshair { stroke: #86938b; stroke-width: 1; }
+.chart-legend i.test-key { background: rgba(197, 238, 121, .25); }
+.best-row td { color: var(--ink); background: #1d2a24; }
+h4.sub { margin: 16px 0 6px; font: 600 14px 'DM Sans', sans-serif; color: var(--ink); }
+h4.sub small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+.preset:disabled { opacity: .45; cursor: default; }
