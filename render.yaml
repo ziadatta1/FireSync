@@ -1,0 +1,26 @@
+# Render Blueprint: FireSync API (FastAPI) + website (static Vite build).
+services:
+  - type: web
+    name: firesync-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt && bash deploy/fetch_data.sh
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/global/datasets
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.21
+      - key: FIRESYNC_ALLOWED_ORIGIN_REGEX
+        value: ^https://firesync[a-z0-9-]*\.onrender\.com$
+      # Only needed for the live FIRMS import feature. Enter it yourself in the Render
+      # dashboard; it is never stored in this repository.
+      - key: FIRMS_MAP_KEY
+        sync: false
+  - type: web
+    name: firesync
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://firesync-api.onrender.com

@@ -1,6 +1,7 @@
 """Read-only API for the FireSync application foundation."""
 
 import csv
+import os
 from datetime import date, datetime, timezone
 from functools import lru_cache
 from pathlib import Path
@@ -41,6 +42,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:5174",
     ],
+    # Deployed frontends (e.g. https://firesync.onrender.com) are allowed by an optional regex.
+    allow_origin_regex=os.environ.get("FIRESYNC_ALLOWED_ORIGIN_REGEX") or None,
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     expose_headers=["Content-Disposition"],
