@@ -7,6 +7,6 @@ BASE="https://github.com/ziadatta1/FireSync/releases/download/data-2026-11-13"
 while read -r sum path; do
   asset="$(echo "$path" | sed 's#^data/##; s#/#__#g')"   # data/global/modis/observations.csv -> global__modis__observations.csv
   mkdir -p "$(dirname "$path")"
-  curl -fsSL --retry 3 -o "$path" "$BASE/$asset"
+  curl -fsSL --http1.1 --retry 5 --retry-all-errors --retry-delay 3 -o "$path" "$BASE/$asset"
 done < deploy/data.sha256
 sha256sum -c deploy/data.sha256
