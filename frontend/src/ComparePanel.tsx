@@ -4,7 +4,7 @@ import { SOURCES, describeArea, filterParams, fmt, getJson, type Area, type Comp
 
 type Config = { a: SourceId; b: SourceId; satA: string; window: number; cell: number }
 const PRESETS: { label: string; hint: string; config: Config }[] = [
-  { label: 'NOAA-20 ↔ NOAA-21', hint: 'Same instrument, ~50 min apart — near-simultaneous', config: { a: 'noaa20', b: 'noaa21', satA: '', window: 60, cell: 0.1 } },
+  { label: 'NOAA-20 ↔ NOAA-21', hint: 'Same VIIRS design, two satellites ~50 min apart', config: { a: 'noaa20', b: 'noaa21', satA: '', window: 60, cell: 0.1 } },
   { label: 'MODIS Aqua ↔ NOAA-21', hint: 'Different instruments, ~1–3 h apart — lagged', config: { a: 'modis', b: 'noaa21', satA: 'A', window: 180, cell: 0.1 } },
   { label: 'MODIS Aqua ↔ NOAA-20', hint: 'Different instruments, ~1–3 h apart — lagged', config: { a: 'modis', b: 'noaa20', satA: 'A', window: 180, cell: 0.1 } },
   { label: 'MODIS ↔ NOAA-21, strict ±60 min', hint: 'Only the few truly close overpasses', config: { a: 'modis', b: 'noaa21', satA: '', window: 60, cell: 0.1 } },
@@ -115,7 +115,7 @@ export default function ComparePanel({ filters, area }: { filters: Filters; area
             <StatTile label="PAIRED CELL-OVERPASSES" value={fmt(r.timing.pairs)} foot={`dates ${r.compared_dates[0]} → ${r.compared_dates[1]} (shared by both)`} />
             <StatTile label="MEDIAN |Δt| BETWEEN PAIRED LOOKS" value={r.timing.median_abs_dt_min === null ? '—' : `${fmt(r.timing.median_abs_dt_min)} min`} foot={r.timing.median_abs_dt_min !== null && r.timing.median_abs_dt_min > 60 ? 'Not simultaneous — fires evolve in this time' : 'Near-simultaneous'} />
             <StatTile label="log-FRP CORRELATION (PEARSON / SPEARMAN)" value={`${fmt(r.frp.pearson_r_log10, 2)} / ${fmt(r.frp.spearman_rho, 2)}`} foot={`${fmt(r.frp.pairs)} pairs with FRP > 0 on both`} />
-            <StatTile label={`MEDIAN FRP RATIO ${nameB} / ${nameA}`} value={fmt(r.frp.median_ratio_b_over_a, 2)} foot={r.frp.median_ratio_95ci ? `95% CI ${fmt(r.frp.median_ratio_95ci[0], 2)}–${fmt(r.frp.median_ratio_95ci[1], 2)} (bootstrap)` : ''} />
+            <StatTile label={`MEDIAN FRP RATIO ${nameB} / ${nameA}`} value={fmt(r.frp.median_ratio_b_over_a, 2)} foot={r.frp.median_ratio_95ci_day_clustered ? `95% CI ${fmt(r.frp.median_ratio_95ci_day_clustered[0], 2)}–${fmt(r.frp.median_ratio_95ci_day_clustered[1], 2)} (resampling whole days, ${r.frp.days} days)` : r.frp.median_ratio_95ci ? `95% CI ${fmt(r.frp.median_ratio_95ci[0], 2)}–${fmt(r.frp.median_ratio_95ci[1], 2)} (pair bootstrap; too few days to resample by day)` : ''} />
             <StatTile label="SPATIAL OVERLAP (JACCARD)" value={fmt(r.spatial_occupancy.jaccard, 2)} foot={`${fmt(r.spatial_occupancy.cells_both)} of ${fmt(r.spatial_occupancy.cells_a + r.spatial_occupancy.cells_b - r.spatial_occupancy.cells_both)} active cells shared, any time`} />
           </div>
 
@@ -147,7 +147,7 @@ export default function ComparePanel({ filters, area }: { filters: Filters; area
                         <tr><td>{nameB} first</td><td>{fmt(earlier.pairs)}</td><td>{fmt(earlier.median_ratio_b_over_a, 3)}</td><td>{fmt(earlier.ci95[0], 3)}–{fmt(earlier.ci95[1], 3)}</td></tr>
                       </tbody>
                     </table>
-                    <p>{overlap ? `If the FRP difference were caused by fires growing or fading between looks, it would reverse when the order reverses. It does not, which points to a ${nameB}–${nameA} measurement difference rather than fire evolution.` : 'The ratio changes with overpass order, so part of the difference reflects fire evolution between looks, not only the sensors.'}</p>
+                    <p>{overlap ? `If the FRP difference were caused by fires growing or fading between looks, it would reverse when the order reverses. It does not, which points to a systematic difference between the two observations (sensor calibration, viewing geometry or processing) rather than fire evolution. These intervals resample pairs and are narrower than day-level uncertainty.` : 'The ratio changes with overpass order, so part of the difference reflects fire evolution between looks, not only the sensors.'}</p>
                   </div>
                 )
               })()}

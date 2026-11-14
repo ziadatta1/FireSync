@@ -23,6 +23,7 @@ science, [DATA_PROVENANCE.md](DATA_PROVENANCE.md) for where every file came from
 |---|---|
 | **Global map & area analysis** | Canvas-rendered map. Detections are aggregated server-side into 2° → 0.1° cells as you zoom, and become individual detections at zoom ≥ 7. Each source has its own color and shape (MODIS ■, NOAA-20 ●, NOAA-21 ◆). Click a cell for per-source counts, or a detection for its full source record. Filter by source, UTC date, confidence class and day/night. Draw a **box** or **polygon**, or type coordinates, to get per-satellite totals, daily and hourly activity, FRP distribution and statistics, confidence classes, top active cells (click to fly there), and a **CSV export** of the exact source rows. |
 | **Sensor comparison** | Paired cell-overpass matching on a common grid with a time window. It reports co-detection rates and separates "not detected" from "not in view" using NASA **swath footprints**: one granule outline per 5–6 minutes per satellite, from the public CMR catalogue. Catalogue gaps are reported as unknown. It also shows the distribution of overpass time offsets, a paired FRP scatter, an overpass-order test, and a calibration that is validated on held-out dates against 1:1. Calibration is refused when the sensors don't observe simultaneously. Presets cover NOAA-20 ↔ NOAA-21 and Aqua MODIS ↔ VIIRS. Runs globally or inside the drawn area. |
+| **Historical calendar** *(experimental)* | Monthly vegetation-fire detections, 2012–2025, from the FIRMS standard-processing archive for two study regions (Central African savanna, Nile Delta). MODIS counts are converted to an estimated VIIRS-equivalent count by a model fitted on 2012–2019 and tested on 2020–2025. Shows a year × month heatmap, a time series, the held-out validation table, and flags for drift years and low-confidence regions. |
 | **Data & provenance** | Per-dataset row counts, a daily strip, SHA-256, quality checks, and an exact-row cross-check against direct FIRMS API retrievals. The original FireSync local-file / API-import map is kept here unchanged. |
 | **Methodology** | Summary of the method and its limits. |
 
@@ -144,20 +145,29 @@ backend/app/compare.py         paired cell-overpass comparison and calibration
 backend/app/firms.py           FIRMS API client and immutable import storage
 backend/scripts/               register_global.py, fetch_swaths.py, run_comparison.py
 backend/app/swaths.py          swath footprints: spherical containment, catalogue-gap handling
+backend/app/archive.py         2012–2025 archive regions, manifest checks, monthly aggregation
+backend/app/harmonize.py       year-based MODIS → VIIRS count models and validation
+backend/scripts/               also fetch_archive.py, audit_archive.py, robustness_archive.py
 frontend/src/GlobalMap.tsx     canvas map, area drawing, record inspector
 frontend/src/DetectionLayer.ts custom Leaflet canvas layer (no DOM markers)
-frontend/src/AnalyticsPanel.tsx, ComparePanel.tsx, DataPanel.tsx, charts.tsx
+frontend/src/AnalyticsPanel.tsx, ComparePanel.tsx, DataPanel.tsx, HistoricalPanel.tsx, charts.tsx
 frontend/src/WildfireMap.tsx   original foundation map (unchanged)
 data/global/                   registered datasets, swath footprints + provenance sidecars
 data/imports/                  FIRMS API imports + sidecars
+data/archive/                  per-region archive manifests + monthly tables (raw files not in Git)
 docs/                          methodology, demo guide, comparison results, screenshots
 ```
 
 ## Limitations
 
-- **Data window.** Eight UTC days of NRT data (6–13 Nov 2026, last day partial). No
-  multi-year archive is loaded, so there is no historical calendar or anomaly baseline, and
-  none is simulated.
+- **Data window.** The map and comparison use eight UTC days of NRT data (6–13 Nov 2026,
+  last day partial).
+- **Historical calendar is experimental.** It covers 2012–2025 for two study regions only
+  (Central African savanna, Nile Delta), from the FIRMS standard-processing archive. Its
+  MODIS → VIIRS-equivalent values are estimates of monthly detection counts, validated on
+  2020–2025 after fitting on 2012–2019. Error grows in 2024–2025, and the Nile Delta is
+  low-confidence. See `docs/METHODOLOGY.md` §9.
+- **Agreement is not ground truth, and a smaller pixel is not a more accurate detection.**
 - **Detections, not fires.** Counts are detections. "No detection" is not "no fire".
 - **MODIS ↔ VIIRS calibration.** It isn't supported by this data: the sensors are 2+ hours
   apart.

@@ -221,12 +221,24 @@ def compare(
         rng = np.random.default_rng(RNG_SEED)
         boots = [np.median(y[s] - x[s]) for s in (rng.integers(0, len(x), len(x)) for _ in range(BOOTSTRAP))]
         frp_block["median_ratio_95ci"] = [round(float(10 ** np.percentile(boots, 2.5)), 4), round(float(10 ** np.percentile(boots, 97.5)), 4)]
+        # Pairs on the same day share weather, fire regime and orbit geometry, so the
+        # pair bootstrap above understates uncertainty.  Resampling whole days is the
+        # more honest interval (own generator, so the outputs above are unchanged).
+        day_ids = np.unique(valid["day"].to_numpy(), return_inverse=True)[1]
+        n_days = int(day_ids.max()) + 1
+        frp_block["days"] = n_days
+        if n_days >= 3:
+            by_day = [(y - x)[day_ids == d] for d in range(n_days)]
+            rng_day = np.random.default_rng(RNG_SEED + 2)
+            boots_day = [np.median(np.concatenate([by_day[d] for d in rng_day.integers(0, n_days, n_days)])) for _ in range(BOOTSTRAP)]
+            frp_block["median_ratio_95ci_day_clustered"] = [round(float(10 ** np.percentile(boots_day, 2.5)), 4), round(float(10 ** np.percentile(boots_day, 97.5)), 4)]
         sample = rng.choice(len(x), size=min(SCATTER_MAX, len(x)), replace=False)
         frp_block["scatter_sample_log10"] = np.round(np.column_stack([x[sample], y[sample]]), 3).tolist()
 
         # Order test: if B/A differs only because fires evolve between looks, the ratio
         # should flip depending on which sensor looked first.  A ratio that is the
-        # same in both orders points to a sensor (not temporal) difference.
+        # same in both orders points to a systematic (not temporal) difference between the
+        # two observations: calibration, viewing geometry or processing.
         order: Dict[str, Any] = {}
         dts = valid["t_b"].to_numpy() - valid["t"].to_numpy()
         for key, sub in (("b_later", dts > 0), ("b_earlier", dts < 0)):

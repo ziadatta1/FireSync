@@ -155,6 +155,13 @@ def test_comparison_pairs_and_coverage_proxy(client):
     assert "b_earlier" not in r["frp"]["order_test"]  # NOAA-21 is always later in the fixture
 
 
+def test_ratio_interval_resamples_whole_days(client):
+    frp = client.get("/api/global/compare", params={"a": "noaa20", "b": "noaa21", "cell": 0.1, "window": 60}).json()["frp"]
+    assert frp["days"] == 5
+    lo, hi = frp["median_ratio_95ci_day_clustered"]
+    assert lo <= frp["median_ratio_b_over_a"] <= hi
+
+
 def test_calibration_recovers_known_relationship_and_validates_out_of_sample(client):
     r = client.get("/api/global/compare", params={"a": "noaa20", "b": "noaa21"}).json()
     cal = r["calibration"]

@@ -43,7 +43,7 @@ export default function DataPanel({ datasets, error }: { datasets: GlobalDataset
           )
         })}
       </div>
-      <div className="notice"><span className="notice-icon">i</span><p><strong>Historical coverage.</strong> The registered global data spans 8 UTC dates (2026-11-06 to 2026-11-13, last day partial). No multi-year archive is loaded, so FireSync shows no long-term calendar or anomaly baseline rather than a simulated one. Archive (SP) sources can be added through the FIRMS importer.</p></div>
+      <div className="notice"><span className="notice-icon">i</span><p><strong>Historical coverage.</strong> The global map and comparison use 8 UTC dates of NRT data (2026-11-06 to 2026-11-13, last day partial). The Historical calendar tab uses a separate, audited 2012–2025 standard-processing archive for two study regions only; its MODIS → VIIRS-equivalent values are experimental estimates. Nothing is simulated.</p></div>
 
       <div className="legacy-block">
         <div className="section-heading">

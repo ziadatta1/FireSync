@@ -5,10 +5,10 @@ export const SOURCE_IDS: SourceId[] = ['modis', 'noaa20', 'noaa21']
 
 // Validated categorical palette (dark surface #101816, all-pairs CVD ΔE >= 9.4).
 // Shape is a second encoding so identity never depends on color alone.
-export const SOURCES: Record<SourceId, { label: string; short: string; color: string; shape: 'square' | 'circle' | 'diamond'; sensor: string }> = {
-  modis: { label: 'MODIS (Terra + Aqua)', short: 'MODIS', color: '#d95926', shape: 'square', sensor: 'MODIS · 1 km' },
-  noaa20: { label: 'VIIRS NOAA-20', short: 'NOAA-20', color: '#3987e5', shape: 'circle', sensor: 'VIIRS I-band · 375 m' },
-  noaa21: { label: 'VIIRS NOAA-21', short: 'NOAA-21', color: '#199e70', shape: 'diamond', sensor: 'VIIRS I-band · 375 m' },
+export const SOURCES: Record<SourceId, { label: string; short: string; color: string; shape: 'square' | 'circle' | 'diamond'; sensor: string; pixel: string }> = {
+  modis: { label: 'MODIS (Terra + Aqua)', short: 'MODIS', color: '#d95926', shape: 'square', sensor: 'MODIS · ~1 km', pixel: '~1 km' },
+  noaa20: { label: 'VIIRS NOAA-20', short: 'NOAA-20', color: '#3987e5', shape: 'circle', sensor: 'VIIRS I-band · 375 m', pixel: '375 m' },
+  noaa21: { label: 'VIIRS NOAA-21', short: 'NOAA-21', color: '#199e70', shape: 'diamond', sensor: 'VIIRS I-band · 375 m', pixel: '375 m' },
 }
 
 export type Filters = {
@@ -111,6 +111,8 @@ export type CompareResponse = {
     spearman_rho?: number | null
     median_ratio_b_over_a?: number
     median_ratio_95ci?: [number, number]
+    median_ratio_95ci_day_clustered?: [number, number]
+    days?: number
     median_pixels_per_pair?: { a: number; b: number }
     scatter_sample_log10?: [number, number][]
     order_test?: Partial<Record<'b_later' | 'b_earlier', { pairs: number; median_ratio_b_over_a: number; ci95: [number, number] }>>

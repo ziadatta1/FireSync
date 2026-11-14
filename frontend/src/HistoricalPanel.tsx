@@ -26,10 +26,14 @@ type Validation = {
 }
 type Series = 'viirs' | 'modis_harmonized' | 'modis' | 'ratio'
 
+// Flags shown to the user, with the thresholds stated next to them.
+const DRIFT_ANNUAL_PCT = 10 // held-out annual total off by more than this → drift flag
+const LOW_CONFIDENCE_FACTOR = 1.25 // held-out typical monthly error above this → low-confidence region
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const SERIES: { id: Series; label: string }[] = [
   { id: 'viirs', label: 'VIIRS S-NPP (observed)' },
-  { id: 'modis_harmonized', label: 'MODIS → VIIRS-equivalent' },
+  { id: 'modis_harmonized', label: 'MODIS → VIIRS-equivalent (estimate)' },
   { id: 'modis', label: 'MODIS (observed, raw)' },
   { id: 'ratio', label: 'Harmonized ÷ VIIRS' },
 ]
@@ -92,7 +96,7 @@ function Heatmap({ rows, series, testFrom }: { rows: MonthRow[]; series: Series;
             <>
               <div>VIIRS S-NPP<b>{fmt(hover.viirs)}</b></div>
               <div>MODIS raw (Aqua {fmt(hover.modis_aqua)} · Terra {fmt(hover.modis_terra)})<b>{fmt(hover.modis)}</b></div>
-              <div>MODIS → VIIRS-equivalent<b>{fmt(hover.modis_harmonized)}</b></div>
+              <div>MODIS → VIIRS-equivalent (estimate)<b>{fmt(hover.modis_harmonized)}</b></div>
             </>
           )}
         </div>
@@ -168,6 +172,13 @@ export default function HistoricalPanel() {
     const ok = cal.months.filter((m) => m.complete)
     return { months: ok.length, incomplete: cal.months.length - ok.length, viirs: ok.reduce((s, m) => s + (m.viirs ?? 0), 0), modis: ok.reduce((s, m) => s + (m.modis ?? 0), 0) }
   }, [cal])
+  const selected = best && models ? models[best] : undefined
+  const driftYears = selected ? Object.entries(selected.test_by_year).filter(([, m]) => m.annual_total_median_abs_pct_error > DRIFT_ANNUAL_PCT) : []
+  const lowConfidence = (id: string) => (selected?.test_by_region[id]?.median_abs_error_factor ?? 0) > LOW_CONFIDENCE_FACTOR
+  const medianModis = useMemo(() => {
+    const v = (cal?.months ?? []).filter((m) => m.complete && m.modis !== null).map((m) => m.modis as number).sort((a, b) => a - b)
+    return v.length ? v[Math.floor(v.length / 2)] : null
+  }, [cal])
   const download = () => {
     if (!cal) return
     const header = 'region,month,split,complete,viirs_snpp_vegetation_fire,modis_vegetation_fire,modis_aqua,modis_terra,modis_harmonized_viirs_equivalent,harmonization_model'
@@ -182,25 +193,33 @@ export default function HistoricalPanel() {
         <div><span className="section-kicker">HISTORICAL CALENDAR</span><h2 id="hist-title">Burning activity 2012–2025</h2></div>
         <span className="catalog-meta">FIRMS standard-processing archive · vegetation fires only</span>
       </div>
-      <p className="lede small">Monthly vegetation-fire detections (FIRMS type 0) per study region, from the science-quality archive. MODIS is converted to a VIIRS-equivalent count with a model fitted on <b>2012–2019</b> and tested on <b>2020–2025</b>. The test years were never used for fitting or tuning.</p>
+      <p className="lede small">Monthly vegetation-fire detections (FIRMS type 0) per study region, from the science-quality archive. MODIS is converted to an <b>estimated</b> VIIRS-equivalent count with a model fitted on <b>2012–2019</b> and tested on <b>2020–2025</b>. The test years were never used for fitting or tuning. This calendar is experimental.</p>
       {error && <div className="error-panel">{error}</div>}
 
       <div className="compare-controls">
         <div className="preset-row">
           {regions.map((r) => (
             <button key={r.id} type="button" disabled={!r.available} className={`preset ${region === r.id ? 'active' : ''}`} onClick={() => setRegion(r.id)}>
-              <strong>{r.label}</strong><span>{r.available ? r.regime : 'not downloaded'}</span>
+              <strong>{r.label}</strong><span>{r.available ? r.regime : 'not downloaded'}{r.available && lowConfidence(r.id) ? ' · low confidence' : ''}</span>
             </button>
           ))}
         </div>
       </div>
+
+      {cal && selected && (
+        <div className="map-warning">
+          <b>Experimental estimate.</b> “MODIS → VIIRS-equivalent” values are model estimates of detection counts, not observed counts, fires or burned area. Validated on {val?.regions?.length ?? 0} study region{val?.regions?.length === 1 ? '' : 's'} only.
+          {driftYears.length > 0 && <> <b>Drift:</b> held-out annual totals are off by more than {DRIFT_ANNUAL_PCT}% in {driftYears.map(([y, m]) => `${y} (${fmt(m.annual_total_median_abs_pct_error, 1)}%)`).join(', ')} (regions pooled). Possible causes: Terra/Aqua orbit drift and the 2023 MODIS 6.03 → 61.03 processing change. Harmonized values for these years are less reliable.</>}
+          {lowConfidence(cal.region) && <> <b>Low confidence for {cal.label}:</b> held-out typical monthly error ×{fmt(selected.test_by_region[cal.region].median_abs_error_factor, 2)} (flagged above ×{LOW_CONFIDENCE_FACTOR}){medianModis !== null ? `, from a median of only ${fmt(medianModis)} MODIS vegetation-fire detections a month` : ''}.</>}
+        </div>
+      )}
 
       {totals && cal && (
         <div className="stat-row">
           <StatTile label="COMPLETE MONTHS" value={fmt(totals.months)} foot={totals.incomplete ? `${totals.incomplete} incomplete months excluded` : 'every month fully fetched'} />
           <StatTile accent="#3987e5" label="VIIRS S-NPP VEGETATION-FIRE DETECTIONS" value={fmt(totals.viirs)} foot="2012-02 → 2025-12" />
           <StatTile accent="#d95926" label="MODIS VEGETATION-FIRE DETECTIONS" value={fmt(totals.modis)} foot={`VIIRS ÷ MODIS = ${fmt(totals.viirs / Math.max(totals.modis, 1), 2)}`} />
-          <StatTile label="HARMONIZATION MODEL" value={cal.harmonization_model ?? '—'} foot={cal.harmonization_model && models ? models[cal.harmonization_model].label : 'needs complete train + test data'} />
+          <StatTile label="HARMONIZATION MODEL" value={cal.harmonization_model ?? '—'} foot={cal.harmonization_model && models ? `${models[cal.harmonization_model].label} · experimental` : 'needs complete train + test data'} />
         </div>
       )}
 
@@ -241,12 +260,13 @@ export default function HistoricalPanel() {
           <p className="chart-note">Median |error| is the typical multiplicative error of a monthly count, so ×1.25 means within 25% for half the months. Bias is the median over- or under-estimate. Anomaly agreement asks whether harmonized MODIS and VIIRS agree that a month is above or below its 2012–2019 normal. "Large" means VIIRS is at least 50% off normal. ★ marks the model selected by leave-one-year-out cross-validation on 2012–2019 only. Test errors are reported but never used for the choice. On the test years the selected model ({best}) {val.selected_beats_no_harmonization_on_test ? 'beats' : 'does NOT beat'} no harmonization{val.selected_beats_pooled_ratio_on_test === null ? '' : ` and ${val.selected_beats_pooled_ratio_on_test ? 'beats' : 'does NOT beat'} the pooled ratio`}. Lowest test error (diagnostic only, not used for selection): {val.lowest_test_error_model_diagnostic_only}. The seasonal shrinkage λ = {val.design?.chosen_lambda} was chosen by leave-one-year-out cross-validation on 2012–2019.</p>
           <h4 className="sub">Test error by year <small>shows whether errors grow over time (possible causes: Terra/Aqua orbit drift after ~2020, and the MODIS 6.03 → 61.03 processing change in Jan 2023; not separated here)</small></h4>
           <table className="data-table compact">
-            <thead><tr><th>Year</th>{['M1', 'M2', best].filter((v, i, a) => a.indexOf(v) === i).map((m) => <th key={m}>{m} median |error|</th>)}<th>Observed VIIRS ÷ MODIS{val.regions && val.regions.length > 1 ? ' (per region)' : ''}</th></tr></thead>
+            <thead><tr><th>Year</th>{['M1', 'M2', best].filter((v, i, a) => a.indexOf(v) === i).map((m) => <th key={m}>{m} median |error|</th>)}<th>{best} annual total error</th><th>Observed VIIRS ÷ MODIS{val.regions && val.regions.length > 1 ? ' (per region)' : ''}</th></tr></thead>
             <tbody>
               {Object.keys(models[best].test_by_year).map((y) => (
                 <tr key={y}>
                   <td>{y}</td>
                   {['M1', 'M2', best].filter((v, i, a) => a.indexOf(v) === i).map((m) => <td key={m}>×{fmt(models[m].test_by_year[y]?.median_abs_error_factor, 2)}</td>)}
+                  <td>{fmt(models[best].test_by_year[y]?.annual_total_median_abs_pct_error, 1)}%{(models[best].test_by_year[y]?.annual_total_median_abs_pct_error ?? 0) > DRIFT_ANNUAL_PCT ? ' ⚠ drift' : ''}</td>
                   <td>{val.ratio_viirs_over_modis_by_year?.filter((r) => String(r.year) === y).map((r) => `${r.region}: ${fmt(r.ratio, 2)}`).join(' · ')}</td>
                 </tr>
               ))}

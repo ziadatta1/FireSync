@@ -71,14 +71,17 @@ Can their observations be combined? FireSync tests that honestly instead of assu
 
 - SHA-256 per file. All rows from today's direct FIRMS API pulls match the downloads exactly
   (100% for granules present in both).
-- "We show 8 real days and say so. No simulated 20-year calendar."
+- "The map shows 8 real days and says so. The 2012–2025 calendar is a separate, audited
+  archive for two regions, and its MODIS → VIIRS conversion is labelled experimental."
 - Scroll down: the original FireSync map, still working.
 
 ## Likely questions
 
 - **Why not merge into one harmonized product?** The sensors don't observe simultaneously,
   and an earlier ratio-based attempt inflated totals. We deliver a validated comparison
-  instead. The NOAA-20/21 relationship is ready to apply if a team chooses to.
+  instead. The NOAA-20/21 relationship is ready to apply if a team chooses to. The one
+  conversion we make is the monthly count estimate in the historical calendar, tested on
+  2020–2025 and labelled experimental.
 - **How do you know the downloads are real?** They were independently cross-checked row by
   row against the FIRMS API with our own MAP_KEY. See `DATA_PROVENANCE.md`.
 - **Performance?** About 920k rows sit in numpy arrays. A global grid takes about 90 ms, and

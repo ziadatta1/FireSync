@@ -88,9 +88,9 @@ function App() {
               {tab === 'map' && <div className="layer-toggles" aria-label="Satellite sources">
                 <span className="control-label">SOURCES</span>
                 {SOURCE_IDS.map((s) => (
-                  <label key={s} className={`layer-toggle ${filters.sources.includes(s) ? 'checked' : ''}`}>
+                  <label key={s} className={`layer-toggle ${filters.sources.includes(s) ? 'checked' : ''}`} title={`${SOURCES[s].sensor}: nominal active-fire pixel size at nadir`}>
                     <input type="checkbox" checked={filters.sources.includes(s)} onChange={() => toggle(s)} />
-                    <i className={`shape-key ${SOURCES[s].shape}`} style={{ background: SOURCES[s].color }} />{SOURCES[s].short}
+                    <i className={`shape-key ${SOURCES[s].shape}`} style={{ background: SOURCES[s].color }} />{SOURCES[s].short}<small className="pixel-size">{SOURCES[s].pixel}</small>
                   </label>
                 ))}
               </div>}

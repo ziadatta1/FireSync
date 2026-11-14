@@ -227,17 +227,20 @@ first (28,603 pairs).
   cases are clouds, and outlines are approximate at swath edges.
 - Footprints are missing for the first hours of 6 Nov and for a few granules. Those looks
   are reported as "unknown".
-- Bootstrap CIs resample pairs independently and understate uncertainty from spatial and
-  temporal autocorrelation. With only 8 days of data, a block-by-day bootstrap is not yet
-  meaningful.
+- Pair-bootstrap CIs resample pairs independently and understate uncertainty from spatial
+  and temporal autocorrelation. The app therefore shows the median FRP ratio's interval from
+  resampling whole days (NOAA-21/NOAA-20, global: 1.14–1.21). With only 8 days, that interval
+  is itself approximate.
 - Pairs are conditional on both sensors detecting, which biases them toward larger fires.
 - NRT products only. Standard-processing (SP) data may revise detections and FRP.
 - Results describe 6–13 November 2026 and the regions burning then (dominated by the
   African savanna burning season). They are not a global transfer function.
 - User-drawn areas (planar point-in-polygon) and lat/lon boxes do not cross the antimeridian.
   Footprint tests do.
-- No multi-year archive is loaded, so there is no historical calendar, seasonal baseline, or
-  anomaly detection, and none is simulated.
+- The historical calendar (§9) is experimental and covers two study regions only.
+- Satellite agreement is not ground truth. FireSync has no independent ground reference, so
+  it reports agreement rates, never accuracy. A smaller pixel (VIIRS 375 m vs MODIS ~1 km) lets
+  a sensor register smaller fires; it does not make an individual detection more correct.
 
 ## 8. Relationship to the earlier "Emberline" prototype
 
@@ -250,4 +253,42 @@ reused**:
 
 FireSync replaces it with the paired, held-out-validated comparison above. It deliberately
 delivers a **comparison product, not a merged "harmonized" dataset**, because the data does
-not support averaging across sensors that don't observe simultaneously.
+not support averaging across sensors that don't observe simultaneously. The only conversion
+FireSync makes is the experimental monthly count estimate in §9, shown separately from
+observed data.
+
+## 9. Historical calendar (experimental)
+
+**Data.** FIRMS standard-processing archive, MODIS_SP (Terra + Aqua, C6.1) and
+VIIRS_SNPP_SP (C2), 2012-01-20 → 2025-12-31, for two study regions: Central African savanna
+[15–32°E, 0–12°N] and the Nile Delta [29–33°E, 29.5–32°N]. 2,038 five-day chunks per region,
+0 failed, every raw file SHA-256-verified (`docs/archive_audit.json`). Only presumed
+vegetation fires (FIRMS `type` = 0) are counted, per month. A month is used only if every
+chunk for both sensors was fetched; incomplete months are excluded, never zero-filled.
+
+**Model.** Five candidates predict the monthly VIIRS S-NPP count from the MODIS count: M0 no
+conversion, M1 pooled ratio, M2 regional ratio, M3 regional seasonal ratio (shrunk), M4
+regional log-log regression. Parameters are fitted on 2012–2019. The model and its shrinkage
+are chosen by leave-one-year-out cross-validation within 2012–2019 only. 2020–2025 is a
+held-out test that is never used for fitting or selection.
+
+**Held-out result (2020–2025, 144 region-months).** The selected model, M3, has a typical
+monthly error of ×1.16 (Central Africa ×1.11, Nile Delta ×1.29), against ×7.54 with no
+conversion and ×1.87 for one pooled ratio. M4 is effectively tied (×1.14).
+
+**Limitations.**
+- **Drift.** Annual-total error grows from 0.1% (2020) to 10.4% (2024) and 20.6% (2025). In
+  Central Africa the VIIRS/Terra ratio rises from ~13 to ~22 while VIIRS/Aqua stays near 6
+  until 2024. This fits Terra's orbit drift, but it coincides with the MODIS 6.03 → 61.03
+  processing change in January 2023, so the cause is not separated. The app flags years with
+  annual error above 10%.
+- **Nile Delta is low-confidence.** Few detections (median 20 MODIS vegetation-fire detections a month), a noisy yearly
+  ratio (about 8–18), and a type-0 share of 41% for VIIRS vs 80% for MODIS. The app flags
+  regions whose held-out monthly error exceeds ×1.25.
+- **Anomaly sign agreement (81%) does not discriminate between models**, because a scale
+  factor cancels out of anomalies. It checks MODIS itself, not the conversion.
+- The calendar estimates detection counts, not fires or burned area. It is not ground truth.
+- 2000–2011 (MODIS only) and the other four candidate regions are not downloaded.
+
+Reproduce with `backend/scripts/audit_archive.py` and `backend/scripts/robustness_archive.py`
+(`docs/historical_robustness.json`).

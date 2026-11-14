@@ -18,6 +18,7 @@
 .filter-fields.compact label.checkbox { flex-direction: row; align-items: center; gap: 8px; min-width: 0; align-self: center; }
 .filter-fields.compact label.checkbox span { font: 13px 'DM Sans', sans-serif; letter-spacing: 0; color: var(--ink-2); }
 .layer-toggle { display: inline-flex; align-items: center; gap: 7px; }
+.pixel-size { color: var(--muted); font-size: 9px; letter-spacing: .02em; }
 .input-error { color: #f0a08a; font-size: 13px; }
 
 .shape-key { display: inline-block; width: 10px; height: 10px; flex: none; }

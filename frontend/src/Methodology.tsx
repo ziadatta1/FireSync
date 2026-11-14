@@ -31,12 +31,24 @@ export default function Methodology() {
           <p>FRP is compared as summed cell-overpass FRP in log space. A reduced-major-axis fit is estimated on the first 60% of dates and validated on later held-out dates against a 1:1 baseline. It is refused when paired looks are &gt; 60 min apart (fires change on that time scale).</p>
         </article>
         <article>
-          <h3>7 · Why no merged “harmonized” product</h3>
-          <p>An earlier prototype applied latitude-band ratios of totals and treated missing observations as zeros. FireSync replaces that with a transparent comparison product. The validated NOAA-20/NOAA-21 relationship is close to 1:1, and MODIS–VIIRS pairs are not simultaneous enough to calibrate.</p>
+          <h3>7 · No merged detection-level product</h3>
+          <p>An earlier prototype applied latitude-band ratios of totals and treated missing observations as zeros. FireSync replaces that with a transparent comparison product. The validated NOAA-20/NOAA-21 relationship is close to 1:1, and MODIS–VIIRS pairs are not simultaneous enough to calibrate. Individual detections and FRP are never converted between sensors. The one conversion FireSync makes is the experimental monthly count estimate in section 11, shown separately from observed data.</p>
         </article>
         <article>
           <h3>8 · Provenance</h3>
           <p>Each file carries a sidecar with SHA-256, row counts, date range and an independent cross-check against rows retrieved directly from the FIRMS API. Every export row carries its dataset, FIRMS source, file hash and source row number.</p>
+        </article>
+        <article>
+          <h3>9 · A smaller pixel is not a more accurate detection</h3>
+          <p>MODIS active-fire pixels are about 1 km at nadir; VIIRS I-band pixels about 375 m. Both grow toward the swath edge (scan × track is shown for every detection). Smaller pixels let VIIRS register smaller or cooler fires and place them more precisely. That does not make any single VIIRS detection more correct: each sensor has its own detection limits, false alarms and missed fires.</p>
+        </article>
+        <article>
+          <h3>10 · Agreement is not ground truth</h3>
+          <p>When two satellites agree, both flagged a thermal anomaly; no fire was confirmed on the ground. When they disagree, the data cannot say which one is right: timing, clouds, viewing angle and fire size all differ. FireSync has no independent ground reference, so it reports agreement rates, never accuracy.</p>
+        </article>
+        <article>
+          <h3>11 · Historical calendar (experimental)</h3>
+          <p>Monthly vegetation-fire detection counts (FIRMS type 0), 2012–2025, from the standard-processing archive for two study regions only. MODIS counts are converted to an estimated VIIRS S-NPP-equivalent count by a model chosen with leave-one-year-out cross-validation on 2012–2019 and tested on 2020–2025. These are estimates of detection counts, not observed counts, fires or burned area. Held-out errors, and the years and regions where they grow, are shown in the calendar.</p>
         </article>
       </div>
     </section>
